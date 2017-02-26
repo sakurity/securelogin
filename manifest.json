@@ -1,0 +1,21 @@
+{  
+  "lang": "en_US",
+  "name": "Truefactor",  
+  "short_name": "Truefactor",
+  "description": "Decentralized password replacement",
+
+  "icons": [{  
+    "src": "./img/192.png",  
+    "sizes": "192x192",
+    "type": "image/png"
+  }],
+  "display": "browser",
+
+  "orientation": "portrait",
+  "start_url": "./index.html",
+  "author": {
+    "name": "Sakurity",
+    "website": "https://sakurity.com/truefactor"
+  },
+  "witnesses": {}
+}

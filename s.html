@@ -1,0 +1,21 @@
+<html manifest="/s.appcache"><body><script>
+c = localStorage.client;
+tfw = 'https://truefactor.io/'
+
+if(top == window){
+  if(c && c != tfw){
+    if(c == 'truefactor://'){
+      location = c+location.hash+'&native=1'
+      setTimeout(function(){
+        window.close()
+      },100)
+    }else{
+      location = c+location.hash
+    }
+  }else{
+    location = tfw+location.hash
+  }
+}else{
+  parent.postMessage(c,'*');
+}
+</script></body></html>

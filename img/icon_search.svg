@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="15px" height="15px" viewBox="0 0 15 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12081) - http://www.bohemiancoding.com/sketch -->
+    <title>icon_search</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="truefactor_apps-list" sketch:type="MSArtboardGroup" transform="translate(-85.000000, -83.000000)" fill="#9B9FA2" opacity="0.498192631">
+            <g id="Rectangle-62-+-Rectangle-62" sketch:type="MSLayerGroup" transform="translate(0.000000, 60.000000)">
+                <g id="Search-+-Shape" transform="translate(85.000000, 19.000000)" sketch:type="MSShapeGroup">
+                    <path d="M11.1645,13.04325 C11.692,12.1505 12,11.11225 12,10 C12,6.68625 9.31375,4 6,4 C2.68625,4 0,6.68625 0,10 C0,13.31375 2.68625,16 6,16 C7.11225,16 8.1505,15.692 9.04325,15.1645 L12.43925,18.5605 C12.71075,18.83225 13.08575,19 13.5,19 C14.3285,19 15,18.3285 15,17.5 C15,17.08575 14.832,16.71075 14.56075,16.4395 L11.1645,13.04325 Z M1.5,10 C1.5,7.51475 3.51475,5.5 6,5.5 C8.48525,5.5 10.5,7.51475 10.5,10 C10.5,12.48525 8.48525,14.5 6,14.5 C3.51475,14.5 1.5,12.48525 1.5,10 Z" id="icon_search"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

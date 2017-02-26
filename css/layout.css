@@ -1,0 +1,393 @@
+
+
+.container {
+  margin: 5px;
+  padding: 5px;
+
+  position: relative;
+  max-height: calc(100%);
+  box-sizing: border-box;
+  transition: left 0.2s ease, right 0.2s ease; }
+  @media screen and (min-width: 480px) {
+    .container {
+      max-width: 480px;
+      margin: 0 auto; } }
+
+
+.loading, .login {
+  height: calc(100% - 110px);
+  padding: 0;
+}
+
+.login {
+  height: auto; }
+  .login .please-sign-in {
+    display: block;
+    margin: 15px auto;
+    color: #7C8185;
+    font-size: 16px;
+    text-align: center; }
+  .login .login-form {
+    background-color: #FFFFFF;
+    box-shadow: inset 0px -1px 0px 0px #DEE7ED, inset 0px 1px 0px 0px #DEE7ED;
+    left: 0;
+    margin-top: 5px;
+    width: 100%;
+    padding: 15px 15px;
+    box-sizing: border-box; }
+    @media screen and (min-width: 480px) {
+      .login .login-form {
+        box-shadow: none;
+        border: 1px solid #DEE7ED;
+        border-radius: 4px; } }
+    .login .login-form .settings-control-input {
+      margin: 0 0 10px 0; }
+    .login .login-form .btn.b {
+      margin: 20px 0 0 0;
+      display: block;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 0.7;
+      padding: 15px 0;
+      background: #4895D3;
+      border-radius: 4px;
+      font-weight: 600;
+      text-align: center; }
+
+
+
+.b {
+  border:none ;
+  color: #FFFFFF;
+  margin: 20px 0 0 0;
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 0.7;
+  padding: 15px 0;
+  background: #4895D3;
+  border-radius: 4px;
+  font-weight: 600;
+  text-align: center; 
+  box-sizing: border-box;  
+}
+
+.splash .logo {
+  margin: 3vh auto 0;
+  position: relative;
+  display: block;
+  height: 90px;
+  width: 90px; }
+.splash .text {
+  display: block;
+  margin: 15px auto; }
+  
+  .splash p {
+    position: relative;
+    text-align: center;
+  }
+
+.splash .progress {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  color: #9B9FA2;
+  font-size: 15px;
+  font-weight: 400;
+  transform: translate(-50%, 0);
+  -webkit-transform: translate(-50%, 0);
+  -ms-transform: translate(-50%, 0); }
+
+
+@media screen and (min-width: 480px) {
+  .apps-list {
+    max-width: 480px; } }
+
+.apps-list {
+  background-color: #FFFFFF;
+  box-shadow: inset 0px -1px 0px 0px #DEE7ED, inset 0px 1px 0px 0px #DEE7ED; }
+  @media screen and (min-width: 480px) {
+    .apps-list {
+      box-shadow: none;
+      border: 1px solid #DEE7ED;
+      border-radius: 4px; } }
+  .apps-list a {
+    display: block;
+    /*padding-bottom: 3px;*/
+    clear: both; }
+
+    .apps-list a:after {
+      content: " ";
+      display: block;
+      position: relative;
+      float: right;
+      margin: -7.5px 0 0;
+      width: calc(100% - 97.5px);
+      border-bottom: 1px solid #DEE7ED; }
+      @media screen and (min-width: 480px) {
+        .apps-list a:after {
+          margin: -5px 0 0;
+          width: calc(100% - 120px); } }
+    .apps-list a:last-child:after {
+      border: none; }
+      
+  .apps-list .app {
+    margin-bottom: 15px; }
+    .apps-list .app .app-icon {
+      max-height: 90px;
+      max-width: 90px;
+      margin-right: 5px;
+      float: left;
+      border: none; }
+      @media screen and (min-width: 480px) {
+        .apps-list .app .app-icon {
+          max-height: 90px;
+          max-width: 90px;
+          margin-right: 30px; } }
+      .apps-list .app .app-icon > img {
+        display: block;
+        margin: 15px;
+        max-height: 60px;
+        max-width: 60px;
+        border: none;
+        border-radius: 4px; }
+        @media screen and (min-width: 480px) {
+          .apps-list .app .app-icon > img {
+            margin: 10px;
+            max-height: 90px;
+            max-width: 90px; } }
+    .apps-list .app .app-name, .apps-list .app .app-name > h2 {
+      color: #4895D3;
+      font-size: 20px;
+      font-weight: 600;
+      /*padding: 15px 0 3.75px;*/ 
+    }
+      .apps-list .app .app-name > h2, .apps-list .app .app-name > h2 > h2 {
+        padding: 0; }
+      @media screen and (min-width: 480px) {
+        .apps-list .app .app-name, .apps-list .app .app-name > h2 {
+          padding: 22.5px 0 3.75px; } }
+    .apps-list .app .app-description {
+      color: #9B9FA2;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 2;
+      margin: 0; }
+    .apps-list .app:last-of-type .app-description:after {
+      border: none; }
+  .apps-list:last-child {
+    margin-bottom: 0; }
+
+
+.settings-control-group {
+  padding: 3.75px;
+  margin-bottom: 22.5px; }
+  .settings-control-group .settings-control-label {
+    display: block;
+    color: #9B9FA2;
+    font-size: 14px;
+    margin-bottom: 7.5px; }
+  .settings-control-group .settings-control-input {
+    display: block;
+    width: 100%;
+    height: 40px;
+    color: #474A4D;
+    font-size: 16px;
+    padding: 7.5px 10px;
+    box-sizing: border-box;
+    border: 1px solid #CFDCE6;
+    border-radius: 4px; }
+    .settings-control-group .settings-control-input.large {
+      height: 60px;
+      font-size: 32px;
+      font-weight: 400;
+      text-align: center;
+      border: none;
+      box-shadow: none; }
+
+  .settings-control-group input.settings-control-input {
+    box-shadow: inset 1px 1px 2px 0px #CFDCE6; }
+
+  .settings-control-group .btn {
+    display: block;
+    background-color: #4895D3;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 200;
+    width: 100%;
+    text-align: left;
+    padding: 0; }
+    label .settings-control-group .btn {
+      margin: 0; }
+  .settings-control-group .checkbox-right {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    position: absolute;
+    right: 80px;
+    height: 20px;
+    width: 20px;
+    background: #FFFFFF;
+    border-radius: 4px;
+    vertical-align: center;
+    transform: translate(0, 2px);
+    -webkit-transform: translate(0, 2px);
+    -ms-transform: translate(0, 2px); }
+    .settings-control-group .checkbox-right:checked {
+      background: #FFFFFF url("../img/icon_checkmark.svg") center center no-repeat; }
+
+
+
+
+
+
+
+
+body {
+  font-family: "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  min-width: 320px;
+  max-height: 100%;
+  z-index: 5; }
+
+
+
+.loading-screen, .login-screen {
+  height: calc(100% - 110px);
+  padding: 0;
+  z-index: 100;
+}
+
+
+
+@media screen and (min-width: 480px) {
+  .apps-list-screen {
+    max-width: 480px; } }
+
+.apps-list {
+  background-color: #FFFFFF;
+  box-shadow: inset 0px -1px 0px 0px #DEE7ED, inset 0px 1px 0px 0px #DEE7ED; }
+  @media screen and (min-width: 480px) {
+    .apps-list {
+      box-shadow: none;
+      border: 1px solid #DEE7ED;
+      border-radius: 4px; } }
+  .apps-list a {
+    display: block;
+    padding-bottom: 3px;
+    clear: both; }
+
+    .apps-list a:after {
+      content: " ";
+      display: block;
+      position: relative;
+      float: right;
+      margin: -7.5px 0 0;
+      width: calc(100% - 97.5px);
+      border-bottom: 1px solid #DEE7ED; }
+      @media screen and (min-width: 480px) {
+        .apps-list a:after {
+          margin: -5px 0 0;
+          width: calc(100% - 120px); } }
+    .apps-list a:last-child:after {
+      border: none; }
+      @media screen and (min-width: 480px) {
+        .apps-list a:last-child:after {
+          border-bottom: 1px solid #DEE7ED; } }
+  .apps-list .app {
+    margin-bottom: 15px; }
+    .apps-list .app .app-icon {
+      height: 90px;
+      width: 90px;
+      margin-right: 5px;
+      float: left;
+      border: none; }
+      @media screen and (min-width: 480px) {
+        .apps-list .app .app-icon {
+          height: 90px;
+          width: 90px;
+          margin-right: 30px; } }
+      .apps-list .app .app-icon > img {
+        display: block;
+        margin: 15px;
+        height: 60px;
+        width: 60px;
+        border: none;
+        border-radius: 4px; }
+        @media screen and (min-width: 480px) {
+          .apps-list .app .app-icon > img {
+            margin: 10px;
+            height: 90px;
+            width: 90px; } }
+    .apps-list .app .app-name, .apps-list .app .app-name > h2 {
+      color: #4895D3;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+      padding: 15px 0 3.75px; }
+      .apps-list .app .app-name > h2, .apps-list .app .app-name > h2 > h2 {
+        padding: 0; }
+      @media screen and (min-width: 480px) {
+        .apps-list .app .app-name, .apps-list .app .app-name > h2 {
+          padding: 22.5px 0 3.75px; } }
+    .apps-list .app .app-description {
+      color: #9B9FA2;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 2;
+      margin: 0; }
+    .apps-list .app:last-of-type .app-description:after {
+      border: none; }
+  .apps-list:last-child {
+    margin-bottom: 0; }
+
+
+
+  .app-auth-screen:after {
+    content: "";
+    display: block; }
+  .app-auth-screen .app {
+    display: block;
+    padding: 18px;
+    border-bottom: 1px solid #DEE7ED; }
+    @media screen and (min-width: 480px) {
+      .app-auth-screen .app {
+        border-bottom: none; } }
+  .app-auth-screen .app-logo {
+    height: 60px;
+    width: 60px;
+    display: block;
+    margin: 0 auto 15px; }
+    @media screen and (min-width: 480px) {
+      .app-auth-screen .app-logo {
+        height: 90px;
+        width: 90px; } }
+  .app-auth-screen .app-name, .app-auth-screen .apps-list .app .app-name > h2, .apps-list .app .app-auth-screen .app-name > h2 {
+    display: block;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0D4D80;
+    margin: 0 auto 7.5px; }
+  .app-auth-screen .app-description {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #7C8185; }
+  .app-auth-screen .app-settings {
+    padding: 15px 15px;
+    box-sizing: border-box;
+    background-color: #FFFFFF; }
+    @media screen and (min-width: 480px) {
+      .app-auth-screen .app-settings {
+        border: 1px solid #DEE7ED;
+        border-radius: 4px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding-bottom: 15px; } }
