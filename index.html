@@ -1,16 +1,11 @@
 <!doctype html>
 <html lang="en" manifestt="./a.appcache">
   <head>
-    <title>Truefactor</title>
-
+    <title>SecureLogin</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta property="og:title" content="Truefactor" />
-    <meta property="og:type" content="company" />
-    <meta property="og:site_name" content="Truefactor" />
+    <meta property="og:title" content="SecureLogin" />
     <meta property="og:description" content="Decentralized Password Replacement" />
-    <meta property="og:url" content="https://truefactor.io" />
     <meta property="og:image" content="./img/apple-touch-icon.png" />
 
     <link rel="manifest" href="./manifest.json">
@@ -19,9 +14,6 @@
     <link rel="apple-touch-icon" href="./img/apple-touch-icon.png">
 
     <script src="./js/scrypt.js"></script>
-
-    <script src="./js/qr.js"></script>
-
     <script src="./js/main.js"></script>
   </head>
 <body>
@@ -32,35 +24,41 @@
     <div class="login-screen login screen">
       <div class="splash add-margin">
         <img class="logo" src="./img/icon_truefactor.svg">
-        <img class="text" src="./img/text_truefactor.svg">
-        <p><a href="https://sakurity.com/truefactor">Decentralized Password Replacement</a></p>
+
 
         <div class="in-web">
-        <p>You need to install Truefactor client to continue. It is a small app that will make registration and authentication frictionless once and for all. Android and iOS apps are coming soon.</p>
+          <p>SecureLogin is a simple password replacement. Please download our app to proceed</p>
 
-        <a class="b" href="/Truefactor-macos.zip">Truefactor for macOS</a>
+          <a class="b" href="/SecureLogin-macos.zip">SecureLogin for macOS</a>
+          <br><hr />
+          <p>Or you can use our web client <b>SecureLogin.pw</b> if your platform isn't supported yet</p>
 
-        <p>Only use experimental web client if your platform isn't supported:</p>
         </div>
 
         <div class="settings-control-group login-form">
           <input required=true type="text" id="login" class="settings-control-input" placeholder="Email">
+          
           <input placeholder="Pairing Code" id="pairingcode" style="display:none" spellcheck="off" class="settings-control-input">
 
 
           <input required=true type="password" id="password" class="settings-control-input" placeholder="Password (one you never used before)">
 
+
+          <!--
           <select id="securityrounds" class=settings-control-input>
             <option selected value="1">Low Security (10 sec)</option>
             <option value="10">Basic Security (30 sec)</option>
             <option value="50">Strong Security (2 min)</option>
           </select>
+          -->
 
-          <a class="b real-sign-in">Sign In</a>
+          <a class="b real-sign-in">Create SecureLogin Account</a>
 
-          <a class="b" id="createfactor">Add Another Device</a>
+          <!--<a class="b" id="createfactor">Add Another Device</a>-->
 
         </div>
+        <p><a href="https://sakurity.com/truefactor">Learn technical details here</a></p>
+
       </div>
     </div>
 
@@ -88,29 +86,21 @@
 
     <div class="app-auth-screen auth screen h">
       <div class="app"><h2 class="app-name"></h2></div>
+
+
+
+      <p>
+        <div class="settings-control-group accounts h">
+          <label class="settings-control-label">Using SecureLogin account:</label>
+          <select class="settings-control-input" id="accountlist"></select>      
+        </div>
+      </p>
+
+
+
       <div class="auth-data h"></div>
 
-      <div class="settings-control-group new-signup">
-        <label class="settings-control-label tfid_label"></label>
-        <input type="text" class="email settings-control-input" placeholder="Email">
-      </div>
-
-
-      <p class="offlineoption h">Approve with another truefactor first. Unable to see the request? <a href="javascript:show($('.offline'));hide($('.approve'))">Click here to use QR instead</a></p>
-
-      <a class="b approve green">Sign In</a>
-
-      <div class="offlineresponse h">
-        <p>If details are correct, scan this response QR</p>
-        <div class="qr" id="responseqr"></div>
-      </div>
-
-      <div class="offline h">
-        <a class="b green" onclick="scanQR(receive_response)">Scan response QR and approve</a>
-        <p>Scan QR below with another truefactor, approve transaction and scan response.</p>
-        <div class="qr" id="proxyqr"></div>
-      </div>
-
+      <a class="b approve green">Login</a>
     </div>
 
 
@@ -120,93 +110,27 @@
     <div class="app-list-screen list screen h">
       <div class="add-margin">
 
-<style>
-.reload { font-family: Lucida Sans Unicode }
-</style>
+    <p>If you forgot your password or want to change your password you need to create new SecureLogin account and click Change SecureLogin in every app you ever used before.</p>
 
+        <a class="b" onclick="screen('login')">Create another SecureLogin account</a>
 
-
-        <a class="b pair-button" onclick="requestpull(1)">
-          <span class=reload>&#x21bb;</span> Check For New Requests
-        </a>
-
-
-        <a class="b scan-button" onclick="requestscan()">
-          Scan QR (Offline Mode)
-        </a>
-
-        <a class="b pair-button" onclick="checkpull(true);screen('pairing');">
-          Add Another Device
-        </a>
-
-        <a class="b" onclick="screen('settings')">
-          Settings
-        </a>
-
+        <a class="b red" onclick="logout()">Log Out</a>
 
         <div class="apps-list h"></div>
       </div>
     </div>
 
 
-    <div class="pairing screen h">
-      <div class="add-margin">
-        <p>If you want to have access from all of your devices, visit https://truefactor.io on another device, download native app or use the Web version, then click "Add Another Device" to scan the QR code.</p>
-        <p>
-          <div class="qr" id="pairqr"></div>
-        </p>
-
-        <p>You can also enter this pairing code manually: <b class="your-id"></b></p>
-
-        <a class="b" onclick="main()">Do It Later</a>
-     </div>
-
-    </div>
-
 
     <div class="settings screen h">
       <div class="add-margin">
         <div class="settings-control-group login-form">
 
-          <div id="setclient">
-            <p>Set Truefactor Client (truefactor:// for native or https://truefactor.io/ for web)</p>
-            <input type="text" class="client-input settings-control-input">
-          </div>
-
-          <p>This is your Recovery Key. Back it up - you can use it if you forget your password.</p>
-          <input type="text" class="root-input settings-control-input">
-
-
-          <p>
-          If you want to have multiple identites you may create another Truefactor account and switch using drop down list at the bottom.</p>
-          <p>
-          You also need this feature if you want to change your password. Update Truefactor to new one with every app you ever used before. <a href="javascript:alert(1)">Click here to see the list of apps you used</a>
-          </p>
-
-
-          <a class="b" onclick="screen('login')">Add Truefactor Account</a>
-
-          <a class="b red" onclick="logout()">Log Out</a>
 
           <a class="b" onclick="main()">Back</a>
         </div>
       </div>
     </div>
-
-
-    <div class="scan h">
-      <p>Scanning QR code</p>
-      <canvas class="qr" id="qr-canvas"></canvas>
-      <video class="h"></video>
-    </div>
-
-    <p>
-      <div class="settings-control-group accounts h">
-        <label class="settings-control-label">Currently using Truefactor:</label>
-        <select class="settings-control-input" id="accountlist"></select>      
-      </div>
-    </p>
-
 
 </div>
 
