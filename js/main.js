@@ -1,18 +1,55 @@
-// prevent backclickjack
-load_date = new Date()
+// Weak mode #1
+scrypt_opts = [18, 6]
 
-function save(){
-  localStorage.accounts = JSON.stringify(Accounts)
-  L = getAccount(localStorage.current_account)
+// Recommended mode for v2
+// scrypt_opts = [20, 20]
+
+
+function main(){
+  if(Accounts.length > 0){
+    localStorage.accounts = JSON.stringify(Accounts)
+
+    var list = ''
+    for(var i in Accounts){
+      var o = Accounts[i]
+      var title = e(o.email) //+" ("+o.date.substr(0,10)+')'
+      list += '<option '+(Number(localStorage.current_profile) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
+    }
+    accountsmain.innerHTML = list
+    show($('.main-form'))
+    show($('.login-form'))
+
+  }else{
+    hide($('.main-form'))
+  }
+
+  screen('list')
+}
+
+
+function loaddev(){
+  if(localStorage.current_profile && confirm("Open experimental features?")){
+    var s = document.createElement('script')
+    s.src = 'js/app.js'
+    document.body.appendChild(s)    
+  }
 }
 
 function getAccount(n){
-  return Accounts[Number(n)]
+  if(!n){n = localStorage.current_profile}
+
+  //clone 
+  var account = Object.assign({}, Accounts[Number(n)])
+
+  account.shared_base = hmac(account.root, 'shared');
+  account.shared_key = nacl.sign.keyPair.fromSeed( Bdec(account.shared_base) )
+
+  return account
 }
 
 function listAccounts(selected){
   if(!selected){
-    selected = localStorage.current_account
+    selected = localStorage.current_profile
   }
   var list = ''
   for(var i in Accounts){
@@ -25,11 +62,38 @@ function listAccounts(selected){
   accountlist.innerHTML = list
 }
 
+function changeAccounts(except){
+  var list = ''
+  for(var i in Accounts){
+    var o = Accounts[i]
+    var title = e(o.email) //+", added on "+o.date.substr(0,10) )
+    
+    if(Number(except) != i)
+    list += '<option value="'+i+'">'+title+'</option>'
+  }
+  show($('.changeaccounts'))
+  changeaccountlist.innerHTML = list
+}
+
 function logout(){
-  if(confirm("You will not lose any data, but you will have to generate private key from your password again.")){
-    localStorage.clear()
-    location.hash = ''
-    location.reload()
+  if(confirm("You will not lose any data, but you will have to enter same email & password to log in this profile again")){
+    if(Accounts.length > 1){
+      Accounts.splice(Number(localStorage.current_profile), 1)
+      localStorage.current_profile = Object.keys(Accounts)[0]
+      main()
+    }else{
+      localStorage.clear()
+      location.hash = ''
+      location.reload()
+
+    }
+  }
+}
+
+function enableweb(){
+  if(confirm("SecureLogin Web client is much slower and less secure, try to install native app instead. Are you sure?")){
+    show($('.login-form'))
+    localStorage.web = 1
   }
 }
 
@@ -47,8 +111,11 @@ function redirect(uri){
     window.close();
   }else{
     location = uri
+    //cordova
+    if(navigator.app) navigator.app.exitApp();
   }
 }
+
 
 function secondsFromNow(seconds){
   return (Math.floor(new Date / 1000)) + seconds
@@ -116,9 +183,6 @@ function show(el){
 
 function l(m){
   console.log(m)
-  setTimeout(function(){
-    $('#debug').innerHTML+=e(JSON.stringify(m))+"<br>";
-  },10)
 }
 
 // primarily used for `scope`
@@ -166,8 +230,7 @@ function sign(message, priv){
 
 
 function screen(label){
-  l('Going to '+label)
-  show($('.container'))
+  //show($('.container'))
   var conts = $$('.screen')
   for(var i=0;i<conts.length;i++){
     if(conts[i].classList.contains(label)){
@@ -182,16 +245,6 @@ function format(origin){
   var formatted = origin.split('/')[2];
   return formatted[0].toUpperCase() + formatted.substr(1);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -221,10 +274,10 @@ function messageDispatcher(message){
   if(m.client){
     if(m.client.match(web_url) && m.client.length < 1000){
 
-      // Truefactor Token, stateless OAuth replacement
       if(format(m.client) != format(m.provider)){
         third_party = true
-        $('.app-name').innerHTML = e(format(m.client))+"<p>would like access to</p>"+e(format(m.provider))
+        //$('.app-name').innerHTML = e(format(m.client))+"<p>would like access to</p>"+e(format(m.provider))
+        $('.app').innerHTML = '<h2 class="app-name">'+e(format(m.client))+'</h2><p style="text-align:center">would like access to</p><h2 class="app-name">'+e(format(m.provider))+"</p>"
       }
     }else{
       errors.push('Invalid client. ')
@@ -241,17 +294,39 @@ function messageDispatcher(message){
     m.scope = ''
   }
 
+  var use_i = false
   if(m.pubkey){
+    var comp =  m.pubkey+' for '
+
     for(var i in Accounts){
-      var shared_base = hmac(Accounts[i].root, 'shared');
-      var shared_key = nacl.sign.keyPair.fromSeed( Bdec(shared_base) )
-      if(Benc(shared_key.publicKey) == m.pubkey){
-        listAccounts(i)
+      comp += Benc(getAccount(i).shared_key.publicKey) +" ";
+      if(Benc(getAccount(i).shared_key.publicKey) == m.pubkey){
+        use_i = i;
+        accountlist.disabled = true
+        break;
       }
     }
 
+    if(!use_i){
+      alert("SecureLogin required for this request cannot be found")
+      return false;
+    }
+
+  }else{
+    use_i = localStorage.current_profile
   }
 
+  if(Accounts.length == 0){
+    errors.push("You don't have SecureLogin profiles")
+  }
+
+  /*
+  if(m.confirmed && !getAccount(use_i).confirmed){
+    alert("Unconfirmed")
+  }
+  */
+
+  listAccounts(use_i);
 
   if(errors.length > 0){
     alert(errors.join(' '));
@@ -261,6 +336,8 @@ function messageDispatcher(message){
 
 
   screen('auth')
+  data = $('.auth-data')
+  hide(data)
 
 
   switch(m.scope) {
@@ -268,13 +345,20 @@ function messageDispatcher(message){
       label = 'Sign In'
       break
     case 'mode=change': 
-      label = 'Change SecureLogin'   
-      break    
+      label = 'Change SecureLogin'
+      if(Accounts.length == 1){
+        alert("You only have one profile, if you want to change it you need to add another SecureLogin profile");
+        location.reload()
+        return false;
+
+      }else{
+        changeAccounts(use_i) 
+      }
+      break
     case 'mode=delete': 
       label = 'Delete This Account'    
       break
     default:
-      data = $('.auth-data')
       var req = fromQuery(m.scope)
       var str = ''
       for(var k in req){
@@ -282,17 +366,23 @@ function messageDispatcher(message){
       }
       data.innerHTML = str;
       show(data)
-      label = 'Approve'
+
+      label = third_party ? 'Grant Access' : 'Approve'
     
   }
   
-
   $(".approve").innerText = label
 
-
   $(".approve").onclick = function(){
+    L = getAccount(accountlist.value);
+
     var diff = new Date() - load_date;
-    if(diff < 900) return false
+    if(diff < 400) return false
+
+    if(m.scope == 'mode=change'){
+      var new_pubkey = getAccount(changeaccountlist.value).shared_key.publicKey
+      m.scope = "mode=change&to="+encodeURIComponent(Benc(new_pubkey))
+    }
 
 
 
@@ -300,171 +390,205 @@ function messageDispatcher(message){
     var token = csv([m.provider, m.client, m.scope, expire_at])
 
     // 1) could be helpful if public key fails (post quantum crypto)
-    // 2) used as password on legacy websites with browser extensions
+    // 2) useful for legacy passwords generator
     // 3) provider can authenticate strings like deposit address with HMAC
-    var shared_base = hmac(L.root, 'shared');
-    var shared_key = nacl.sign.keyPair.fromSeed( Bdec(shared_base) )
-
-    var shared_secret = third_party ? '' : hmac( shared_base , m.provider)
+    var shared_secret = hmac( getAccount().shared_base , m.provider)
 
     var response_obj = {
       state: m.state,
-      act: 'proxy',
+      act: m.ping?'ping':'localstorage',
       response: csv([
         token,
-        sign(token, Benc(shared_key.secretKey)),
-
-        Benc(shared_key.publicKey)
+        csv([sign(token, Benc(getAccount().shared_key.secretKey)), hmac(shared_secret, token)]),
+        csv([Benc(getAccount().shared_key.publicKey), third_party ? '' : shared_secret]),
+        getAccount().email
       ])
     }
 
     // future requests will open native directly, without /s proxy
-    if(m.native) response_obj.native = 1
+    if(m.securelogin) response_obj.securelogin = 1
 
-
-    redirect(m.client + "?" + toQuery(response_obj))
-  
-  
+    var callback = m.client + "?" + toQuery(response_obj)
+    
+    if(m.ping){
+      //alert('pinging '+callback);
+      ping.src = callback
+      ping.onload = function(){
+        if(navigator.app){
+          navigator.app.exitApp();
+        }else{
+          window.close()
+        }
+      }
+      ping.onerror = ping.onload
+      //make sure it hits ping endpoint, 5s timeout
+      setTimeout(ping.onload,5000)
+    }else{
+      redirect(callback)
+    }
   }
-
 }
 
 
 
-function generation(){
-  var password = $('#password').value;
-  var errors = '';
 
-  // offer a Security Mode based on how strong this password is
-  /*
-  if(zxcvbn(password).guesses < 100){
-    errors += 'Create stronger password.'
-  }*/
-  new_account = {}
+function derive(password, email, cb){
+  var opts = {
+    N: Math.pow(2,scrypt_opts[0]),
+    interruptStep: 1000,
+    p: scrypt_opts[1],
+    r: 8,
+    dkLen: 32,
+    encoding: 'base64'
+  }  //1 1 cinii
 
-  var rounds = 1 //parseInt(securityrounds.value)
-  new_account.email = $('#login').value
-  var salt = new_account.email+','+rounds
-
-  if(new_account.email.indexOf('@') == -1){
-    errors += 'Email is invalid. '
-  }
-
-
-  if(errors.length > 0){
-    alert(errors);
-    return false;
-  }
-
-  screen('generation');
-
-  var start_derive = new Date
-  derived = function(root){
-    l(root + " took "+(new Date - start_derive))
-    new_account.root = root
-    new_account.date = new Date().toJSON()
-    localStorage.current_account = Accounts.push(new_account) - 1
-    hide($('.cssload-thecube'))
-    show($('.accept-rules'))
-  }
-
-  var scryptN = Math.pow(2,18)
 
   if(E){
-    nodeRequire("scrypt").hash(password,
-      {"N":scryptN,"r":8,"p":rounds},
-      32,salt).then(function(root){
-        derived(root.toString("base64"))
-      })
+    nodeRequire("scrypt").hash(password,opts,32,email).then(function(root){cb(root.toString("base64"))})
+  }else if(email!='force@scrypt.com' && window.plugins && window.plugins.scrypt){
+    // sometimes we want to make sure native plugin is faster
+    window.plugins.scrypt(function(root){cb(hexToBase64(root))}, alert, password, email, opts)
   }else{
-    scrypt(password, salt, {
-        N: scryptN,
-        interruptStep: 1000,
-        p: rounds,
-        r: 8,
-        dkLen: 32,
-        encoding:  'base64'
-      }, derived)
+    scryptjs(password, email, opts, cb)
   }
 
 }
 
 
-function main(){
-  save()
-  listAccounts()
-  var hash = location.hash.substr(1);
-  if(hash.length > 0){
-    var message = fromQuery(hash);
-    if(message){
-      messageDispatcher(message);
-    }
-  }else{
-    screen('list')
-
-  }
+function hexToBase64(hexstring) {
+    return btoa(hexstring.match(/\w{2}/g).map(function(a) {
+        return String.fromCharCode(parseInt(a, 16));
+    }).join(""));
 }
 
 
-
-
-
+// prevent backclickjack
+load_date = new Date()
 
 window.onload = (function(){
-  if(location.origin.startsWith('http')){
-    //web app
-
-    if(location.hash=='#logout'){ logout() }
-
-    // this is loaded by native client after installation
-    if(location.hash=='#native'){
-      if(confirm("Did you install Truefactor application? All requests will be opened in it instead of Web version.")){
-        localStorage.client = 'truefactor://'
-        location.hash = ''
-      }
-    }
-
-
-
-  }else{
-    //native app
-
-    hide($('.in-web'));
-    //hide(setclient)
+  // event listeners
+  accountsmain.onchange = function(){
+    localStorage.current_profile=this.value;
+    main()
   }
 
+  $('.real-sign-in').onclick = function generation(){
+    var errors = '';
+    var password = $('#password').value;
+    var email = $('#login').value.toLowerCase()
+    var email_regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
-  m = {} //current request
-  iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if(!email_regex.test(email)){
+      errors += 'Invalid email. '
+    }
 
-  navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia||navigator.msGetUserMedia
+    if(password.length < 8){
+      errors += 'Password must be at least 8 characters. '
+    }
 
+    Accounts.map(function(e){ if(e.email == email){ 
+      errors += "You already used this email for another profile. "}  
+    })
 
-  
+    if(errors.length > 0){
+      alert(errors);
+      return false;
+    }
+      
+    $('#password').value = ''
+
+    screen('generation');
+
+    show($('.step1'))
+    hide($('.step2'))
+
+    var start_derive = new Date
+    setTimeout(function(){ //need delay to show animation
+      derive(password, email, function(root){
+        // send stats about current device and derivation benchmark
+        new_account = {
+          email: email,
+          root: root,
+          date: new Date().toJSON(),
+          benchmark: new Date-start_derive,
+          scrypt_opts: scrypt_opts.join(','),
+          confirmed: false
+        }
+
+        hide($('.step1'))
+        show($('.step2'))
+
+        $('.accept-rules').onclick = function(){
+          localStorage.current_profile = Accounts.push(new_account) - 1;
+          main()
+
+          if(Accounts.length == 1 && !inweb){
+            redirect('https://securelogin.pw/#native');
+          }
+        }
+        if(Accounts.length > 0){
+          // already accepted
+          $('.accept-rules').click()
+        }
+
+      })
+    },200)
+  }
+
   password.onkeypress=function(e) {
     if (e.which == 13) {
       e.preventDefault();
-      generation();
+      $('.real-sign-in').click();
     }
   }
-  $('.real-sign-in').onclick = generation
 
-
-  if(localStorage.current_account && localStorage.accounts){
-    Accounts = JSON.parse(localStorage.accounts)
-    L = getAccount(localStorage.current_account)
-    startmain = setTimeout(main, 500)
-  }else{
-    Accounts = []
-    screen('login');
-
+  $('.native').onclick=function(){
+    alert("From now on SecureLogin buttons will open native app in this browser. Just make sure you don't forget your master password (or write it down).")
+    localStorage.client = 'securelogin://'
+    //location.hash = ''
+    //document.write("Please close this page, you can now use SecureLogin with websites and apps.")
+    window.close()      
+    //}
   }
 
+
+
+  window.inweb = location.origin.startsWith('http')
+  window.Accounts = localStorage.current_profile ? JSON.parse(localStorage.accounts) : []
+
+  if(inweb){
+    hide($('.login-form'))
+    
+    var hash = location.hash.substr(1);
+    
+    if(hash=='native'){
+      // proxy to native app
+      screen('generation')
+      hide($('.step1'))
+      hide($('.step2'))
+      show($('.step3'))
+      return false
+    }
+
+
+
+    if(hash.length > 5 && localStorage.current_profile){
+      // web app auth request
+      messageDispatcher(fromQuery(hash));
+      return false
+    }
+  }else{
+    hide($('.in-web'));
+
+  }
+  window.delayed_launch = setTimeout(main,1000)
+
+  // smoke test
+  //if(window.plugins){
+  //  window.plugins.scrypt(function (res) { window.testscrypt = res; },function (err) { alert(err) },'password', 'salt', {N: 2})
+  //}
+
+    
+
 })
-
-
-
-
-
-
 

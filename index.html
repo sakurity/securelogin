@@ -1,142 +1,164 @@
-<!doctype html>
-<html lang="en" manifestt="./a.appcache">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>SecureLogin</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta property="og:title" content="SecureLogin" />
     <meta property="og:description" content="Decentralized Password Replacement" />
-    <meta property="og:image" content="./img/apple-touch-icon.png" />
+    <meta property="og:image" content="./icon-60@2x.png" />
+    <link rel="apple-touch-icon" href="./icon-60@2x.png">
+    
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
 
-    <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="./css/layout.css">
-    <link rel="stylesheet" href="./css/extra.css">
-    <link rel="apple-touch-icon" href="./img/apple-touch-icon.png">
 
-    <script src="./js/scrypt.js"></script>
-    <script src="./js/main.js"></script>
   </head>
-<body>
+  <body>
+    <div class="container">
+      <div class="generation screen splash h">
+        <img class="logo" src="./icon-60@2x.png">
+
+        <div class="step1 h">
+
+          <p>SecureLogin uses your password to generate a cryptographic key to your digital identity. This process is slow - to make your password harder to guess. Please keep this page open, it may take up to 20 seconds.</p>
 
 
-
-<div class="container h">
-    <div class="login-screen login screen">
-      <div class="splash add-margin">
-        <img class="logo" src="./img/icon_truefactor.svg">
-
-
-        <div class="in-web">
-          <p>SecureLogin is a simple password replacement. Please download our app to proceed</p>
-
-          <a class="b" href="/SecureLogin-macos.zip">SecureLogin for macOS</a>
-          <br><hr />
-          <p>Or you can use our web client <b>SecureLogin.pw</b> if your platform isn't supported yet</p>
-
-        </div>
-
-        <div class="settings-control-group login-form">
-          <input required=true type="text" id="login" class="settings-control-input" placeholder="Email">
-          
-          <input placeholder="Pairing Code" id="pairingcode" style="display:none" spellcheck="off" class="settings-control-input">
-
-
-          <input required=true type="password" id="password" class="settings-control-input" placeholder="Password (one you never used before)">
-
-
+          <div id="fountainG">
+            <div id="fountainG_1" class="fountainG"></div>
+            <div id="fountainG_2" class="fountainG"></div>
+            <div id="fountainG_3" class="fountainG"></div>
+            <div id="fountainG_4" class="fountainG"></div>
+            <div id="fountainG_5" class="fountainG"></div>
+            <div id="fountainG_6" class="fountainG"></div>
+            <div id="fountainG_7" class="fountainG"></div>
+            <div id="fountainG_8" class="fountainG"></div>
+          </div>
           <!--
-          <select id="securityrounds" class=settings-control-input>
-            <option selected value="1">Low Security (10 sec)</option>
-            <option value="10">Basic Security (30 sec)</option>
-            <option value="50">Strong Security (2 min)</option>
-          </select>
-          -->
-
-          <a class="b real-sign-in">Create SecureLogin Account</a>
-
-          <!--<a class="b" id="createfactor">Add Another Device</a>-->
-
-        </div>
-        <p><a href="https://sakurity.com/truefactor">Learn technical details here</a></p>
-
-      </div>
-    </div>
-
-
-    <div class="generation screen h">
-      <div class="step1 splash">
-        <p>We use your master password to generate strong cryptographic key to all your accounts.</p>
-
-        <p>Then we use second password to generate your second key to sign critical requests such as money transfer.</p>
-
-        <p><b>Do you accept that all your credentials will be lost if you forget your exact password?</b></p>
-
-        <div class="cssload-thecube">
-          <div class="cssload-cube cssload-c1"></div>
-          <div class="cssload-cube cssload-c2"></div>
-          <div class="cssload-cube cssload-c4"></div>
-          <div class="cssload-cube cssload-c3"></div>
+          <div class="cssload-thecube">
+            <div class="cssload-cube cssload-c1"></div>
+            <div class="cssload-cube cssload-c2"></div>
+            <div class="cssload-cube cssload-c4"></div>
+            <div class="cssload-cube cssload-c3"></div>
+          </div>-->
         </div>
 
-        <a class="b accept-rules h" onclick="main(true)">Accept</a>
-      </div>
+        <div class="step2 h">
+          <p> 3rd parties cannot compromise your accounts anymore without your master password. You entirely own your identity: SecureLogin is authentication without a middle man.</p>
 
-    </div>
+          <p>Last step: visit SecureLogin.pw in your browser and click the button that you installed our app</p>
 
-
-    <div class="app-auth-screen auth screen h">
-      <div class="app"><h2 class="app-name"></h2></div>
-
-
-
-      <p>
-        <div class="settings-control-group accounts h">
-          <label class="settings-control-label">Using SecureLogin account:</label>
-          <select class="settings-control-input" id="accountlist"></select>      
+          <p>Do you accept that <b>all accounts you used with SecureLogin will be lost if you forget your exact master password?</b></p>          
+          <a class="b accept-rules slbutton">Accept</a>
         </div>
-      </p>
 
+        <div class="step3 h">
+          <p>Here is a list of websites and apps that currently support SecureLogin. Ask admins of websites you like to add SecureLogin if you hate passwords just like we do.</p>
 
+        </div>
 
-      <div class="auth-data h"></div>
-
-      <a class="b approve green">Login</a>
-    </div>
-
-
-
-
-
-    <div class="app-list-screen list screen h">
-      <div class="add-margin">
-
-    <p>If you forgot your password or want to change your password you need to create new SecureLogin account and click Change SecureLogin in every app you ever used before.</p>
-
-        <a class="b" onclick="screen('login')">Create another SecureLogin account</a>
-
-        <a class="b red" onclick="logout()">Log Out</a>
-
-        <div class="apps-list h"></div>
       </div>
-    </div>
+
+
+      <div class="app-auth-screen auth screen h">
+        <div class="app"><h2 class="app-name"></h2></div>
+        <p>
+          <div class="settings-control-group accounts h">
+            <label class="settings-control-label">Using profile:</label>
+            <select class="settings-control-input" id="accountlist"></select>      
+          </div>
+        </p>
+
+        <div class="settings-control-group changeaccounts h">
+          <center><img src="img/downarrow.png" width="50px"></center>
+          <label class="settings-control-label">Change to profile:</label>
+          <select class="settings-control-input" id="changeaccountlist"></select>     
+        </div>
+
+        <div class="auth-data h"></div>
+        <a class="b approve green">Login</a>
+      </div>
+
+
+      <div class="app-list-screen list screen h">
+        <div class="splash add-margin">
+          <img class="logo" src="./icon-60@2x.png" onclick="loaddev()">
+
+          <div class="in-web">
+            <p>Forget about passwords with SecureLogin</p>
+            
+
+            <p><a href=""><img src="img/appstore.svg" class="store"></a><br>
+            <a href=""><img src="img/googleplay.png" class="store"></a><br>
+            <a href=""><img src="img/macappstore.svg" class="store"></a><br>
+            <a href=""><img src="img/windowsstore.png" class="store"></a></p>
+
+
+            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a>. You may also <a href="javascript:enableweb();">enable experimental web client</a></p>
+
+            <p><a class="b native slbutton">SecureLogin app is already installed?</a></p>
+
+          </div>
+
+
+          <div class="settings-control-group main-form h">
+            <label class="settings-control-label">Default profile:</label>
+            <select class="settings-control-input" id="accountsmain"></select>
+            <a class="b red slbutton" onclick="logout()">Log out of this profile</a>
+          </div>
+
+          <div class="settings-control-group login-form">
+
+            <p>Make sure you write down your master password and that you never used this password before.</p>
+
+            <p><input required=true type="text" id="login" class="settings-control-input" placeholder="Email"></p>
+            <input required=true type="password" id="password" class="settings-control-input" placeholder="Master Password">
+            <a class="b real-sign-in slbutton">Add SecureLogin profile</a>
+
+          </div>
 
 
 
-    <div class="settings screen h">
-      <div class="add-margin">
-        <div class="settings-control-group login-form">
+
+          <div class="settings-control-group dev h" style="font-size:14px">
+
+            <h2>WARNING: experimental features</h2>
+
+            <p>Legacy Password Generator</p>
+            <p><input type="text" id="managerprovider" class="settings-control-input" placeholder="Website or app name e.g. 'twitter' " onchange="manager()" onkeyup="manager()"></p>
+            <p><input type="text" id="managerpassword" class="settings-control-input" onclick="copypassword()" placeholder="Click to copy generated password"></p>
+            <small class="h" id="copymessage">Copied</small>         
+
+            <p>Accounts dump</p>
+            <input id="secretkey" class="settings-control-input">
+
+            <p>Bitcoin</p>
+            <input id="btc" class="settings-control-input">
+            <p>Mnemonic (use to import seeds)</p>
+            <input id="mnemonic" class="settings-control-input">
+            <p>Bitcoin Testnet</p>
+            <input id="btctest" class="settings-control-input">
+            <p>Litecoin</p>
+            <input id="ltc" class="settings-control-input">
+            <p>Ethereum</p>
+            <input id="eth" class="settings-control-input">
+            <p>Ripple</p>
+            <input id="xrp" class="settings-control-input">
+            <p>NEM</p>
+            <input id="xem" class="settings-control-input">
+          </div>
 
 
-          <a class="b" onclick="main()">Back</a>
+
         </div>
       </div>
     </div>
-
-</div>
-
-
-<a style="position:absolute;right:0px;bottom:0px;" onclick="debug.style.display='block'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><div id="debug" style="display:none"></div>
-
-
-</body>
+    <img class="h" id="ping">
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/scrypt.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+  </body>
 </html>

@@ -28,7 +28,7 @@ SecureLogin = function(callback, scope){
     request.scope = SecureLogin.toQuery(scope);
   }
 
-  request.state = crypto.getRandomValues(new Uint8Array(10)).reduce(function(a,k){return a+''+(k%32).toString(32)},'');
+  request.state = crypto.getRandomValues(new Uint8Array(32)).reduce(function(a,k){return a+''+(k%32).toString(32)},'');
  
   if(!SecureLogin.channels) SecureLogin.channels = {}
  
@@ -38,22 +38,36 @@ SecureLogin = function(callback, scope){
   var query = SecureLogin.toQuery(request)
 
   //var failback = setTimeout(function(){
-  if(localStorage.native){
+  if(localStorage.securelogin){
     location = 'securelogin://#'+query
   }else{
-    //c.w = window.open('https://securelogin.pw/s#' + query);        
-    c.w = window.open('http://securelogin.dev/#' + query);        
+    c.w = window.open('https://securelogin.pw/s#' + query);        
   }
   
   c.cb = callback
+
+
   c.interval = setInterval(function(){
-    var response = localStorage["securelogin_"+request.state];
-    if(response){
-      if(c.w){c.w.close()}
-      window.focus()
-      delete(localStorage["securelogin_"+request.state])
-      clearInterval(c.interval);
-      c.cb(response);
+    if(SecureLogin.ping){
+      var ping = new XMLHttpRequest()
+      ping.open('get','/securelogin?act=get&state='+request.state);
+      ping.onreadystatechange = function(){
+        if(ping.readyState==4){
+          c.cb(ping.responseText);
+        }
+      }
+
+    }else{
+
+
+      var response = localStorage["securelogin_"+request.state];
+      if(response){
+        if(c.w){c.w.close()}
+        window.focus()
+        delete(localStorage["securelogin_"+request.state])
+        clearInterval(c.interval);
+        c.cb(response);
+      }
     }
 
   }, 500)

@@ -1,7 +1,7 @@
 {  
   "lang": "en_US",
-  "name": "Truefactor",  
-  "short_name": "Truefactor",
+  "name": "SecureLogin",  
+  "short_name": "SecureLogin",
   "description": "Decentralized password replacement",
 
   "icons": [{  
@@ -15,7 +15,7 @@
   "start_url": "./index.html",
   "author": {
     "name": "Sakurity",
-    "website": "https://sakurity.com/truefactor"
+    "website": "https://sakurity.com/securelogin"
   },
   "witnesses": {}
 }
