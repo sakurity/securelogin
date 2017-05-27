@@ -12,7 +12,7 @@ Here are 5 major problems it solves:
 
 2. __Usability__: existing onboarding process is a disaster for conversion: Email, confirm email, password, confirm password, wait you need one digit and one capital letter, think of a new password, sign up and go to email box to click "Confirm My Email" a 1000th time in your life. **With SecureLogin, it's just two clicks.**
 
-3. __Central authority__: Currently every account depends on a email, which can be used to set a new password. Email is very centralized - majority uses services like Gmail. This is even worse for SMS, which is owned by telecom corporations. This attack is currently exploited in the wild only against political activists, but there's no need to wait for someone to hack a major email/SMS provider – __with SecureLogin there's no central authority, no central server and no way to hijack your account__.
+3. __Central authority__: Currently every account depends on an email, which can be used to set a new password. Email is very centralized - majority uses services like Gmail. This is even worse for SMS, which is owned by telecom corporations. This attack is currently exploited in the wild only against political activists, but there's no need to wait for someone to hack a major email/SMS provider – __with SecureLogin there's no central authority, no central server and no way to hijack your account__.
 
 4. __Man-in-the-Middle__: interaction of the user computer and the server is often compromised in between: broken HTTPS, CloudFlare, malicious browser extensions, Man-in-the-Browser and XSS can be prevented when the user explicitly signs every critical transaction. 
 
@@ -43,21 +43,21 @@ Please note, password manager are not in the table because there's no such thing
     <td class=g1>Email provider can set new pw</td>
     <td class=g1>Terrible UX</td>
     <td class=g1></td>
-    <td class=g3></td>
+    <td class=g3>Free (except cost of mail services)</td>
   </tr>
 
   <tr>
     <td>Standard + TOTP</td>
-    <td class=g1></td>
+    <td class=g1>- (first "factor" isn't fixed)</td>
     <td class=g3>Password is not enough to login</td>
     <td class=g1>Terrible UX + inconvenient "paper" backup codes + typing 6 digits every time</td>
     <td class=g2>Delayed, not prevented (malware can wait for the user to enter OTP code)</td>
-    <td class=g3></td>
+    <td class=g3>Free</td>
   </tr>
 
   <tr>
     <td>Standard + U2F/Yubikey</td>
-    <td class=g1></td>
+    <td class=g1>-</td>
     <td class=g3>Password is not enough to login</td>
     <td class=g1>Terrible UX, no usable backup strategy at all, no iOS support</td>
     <td class=g2>Delayed, not prevented</td>
@@ -66,7 +66,7 @@ Please note, password manager are not in the table because there's no such thing
 
   <tr>
     <td>Standard + SMS / Authy / Duo</td>
-    <td class=g1></td>
+    <td class=g1>-</td>
     <td class=g1>"Second" factor is a central authority too just like email provider. Plus vendor lock-in.</td>
     <td class=g2>Duo offers nice user interface, but register/login experience is still slow and painful</td>
     <td class=g2>Delayed, not prevented</td>
@@ -77,89 +77,72 @@ Please note, password manager are not in the table because there's no such thing
 
   <tr>
     <td>Magic Link on Email / Mozilla Persona</td>
-    <td class=g3>No password - no reuse</td>
+    <td class=g3>No per-site passwords - no reuse</td>
     <td class=g1>Email provider can login on behalf of your account</td>
     <td class=g2>Greatly improved UX: that's why Slack and Medium already adopted Magic Links</td>
-    <td class=g1></td>
-    <td class=g3></td>
+    <td class=g1>-</td>
+    <td class=g3>Free</td>
   </tr>
 
   <tr>
     <td>OAuth / OpenID / SAML / any SSO</td>
-    <td class=g3></td>
+    <td class=g3>No per-site passwords</td>
     <td class=g1>OAuth provider can login on behalf of your account, vendor lock-in</td>
     <td class=g3>Best UX: 2 clicks</td>
-    <td class=g1></td>
-    <td class=g3></td>
+    <td class=g1>-</td>
+    <td class=g3>Free</td>
   </tr>
 
 
   <tr class="esoteric">
-    <td>Trezor (U2F is included)</td>
-    <td class=g3></td>
+    <td>Trezor</td>
+    <td class=g3>+</td>
     <td class=g3>Signing key never leaves your hardware token</td>
-    <td class=g1>Requires using a token every time, writing down 24 words, no iOS support. (However, great for Bitcoin)</td>
-    <td class=g2>Scope-specific signature is currently implemented <a href="http://doc.satoshilabs.com/trezor-user/makingpayments.html">only for TREZOR Wallet</a>, not available as API for any website</td>
+    <td class=g1>Requires using a token every time, writing down 24 words, no iOS support</td>
+    <td class=g2>-</td>
     <td class=g1><a href="https://shop.trezor.io">$128</a></td>
   </tr>
 
 
-
-
   <tr>
     <td>SecureLogin</td>
-    <td class=g3></td>
-    <td class=g3>Signing key never leaves your device</td>
-    <td class=g3>2 Clicks register/login experience. Works on all platforms. Master password is all you need for recovery</td>
-    <td class=g3>SecureLogin2 with Doublesign protects from malware with scope-specific signature</td>
-    <td class=g3>Forever Free and Open Source</td>
+    <td class=g3>No per-site passwords</td>
+    <td class=g3>Cryptographic key never leaves your device</td>
+    <td class=g3>Excellent sign-up and login user experience. Works on all platforms with all browsers</td>
+    <td class=g3>V2 with Doublesign will protect from malware with scope-specific signature</td>
+    <td class=g3>Free and Open Source</td>
   </tr>
 </table>
 
-### Step 1. Redirect to SecureLogin client
-
-You can use external SecureLogin SDK or copy it to your server
-
-`<script src="https://securelogin.pw/sdk.js" integrity="sha384-cmzAgn2ei6Y8ZbyWS7WhxzGCjdZ+VTo5MIZBTkmPFW/ZxMbdktzDbWv3gZzu0/kB" crossorigin="anonymous"></script>`
-
-Login button to put in your HTML
-
-`<a class="securelogin-login" style="background-color:#0b6efd;color:#fff;padding:0.5em 1em;margin: 0 auto;">Secure Login</a>`
+### Step 1. Open SecureLogin client
 
 "Secure Login" button opens a window `https://securelogin.pw/s#provider=https://my.app&state=STATE`. `/s` is a proxy URL that runs a native app `securelogin://provider=https://my.app&state=STATE` for existing SecureLogin users or redirects to Web version for new users (where they can also choose and download a native client).
 
 Parameters:
 
-`provider` - required. Use origin of your app eg https://my.app
+**`provider`** - required. Use origin of your app eg https://my.app
 
-`state` - required. Use a random string, save locally and verify that `state` from response is equal `state` from localStorage/cookies/etc to prevent CSRF.
+**`state`** - required. Use a random string, save locally and verify that `state` from response is equal `state` from localStorage/cookies/etc to prevent CSRF.
 
-`client` - defaults to provider+'/securelogin'. Works as redirect_uri in OAuth, consumer of the token.  It's recommended to scope securelogin-related functionality under /securelogin endpoint on your app, however you may supply any URI on any domain.
+`callback` - `direct` by default or `ping` (recommended). `direct` callback opens `client` URL in the system browser. Ping response makes a GET request to that URL instead. Read Ping vs Direct explanation below. 
+
+`client` - defaults to provider+'/securelogin', URL which will be opened or pinged (depends on `response` option), consumer of the token.  It's recommended to use default `/securelogin` but you may send any path on your domain.
 
 `scope` - defaults to empty string, for regular sign-in functionality. Some applications may want to use it to sign critical requests such as money transfer: `Action=Delete%20Account` or `Action=Money%20Transfer&Amount=1.3&Address=FRIEND`
 
-### Step 2. Private key generation
-
-It's recommended to install native versions for all users for two reasons: web applications <a href="https://sakurity.com/blog/2015/07/28/appcache.html">cannot be trusted</a> and performance of scrypt password derivation.
-
-New users must type an email and first password. It runs key derivation function (scrypt) for 10-50 seconds. It's longer than any other software to prevent offline bruteforce even for the weak passwords. Then SecureLogin warns the user to either remember their password or backup the recovery code (which is derived material from the password).
-
-`p` value for scrypt function depends on security mode user has chosen. The longer derivation, the better.
+New users should type an email and master password. It runs key derivation function (scrypt) with `logN=18 p=6` and takes up to 20 seconds. Then SecureLogin warns the user to either remember their password or write it down.
 
 ```
-derived_root = require("scrypt").hashSync("firstpassword",{"N":Math.pow(2,18),"r":8,"p":1},32,"email").toString("base64")
+derived_root = require("scrypt").hashSync("firstpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"email").toString("base64")
 ```
 
-
-After clicking Sign In/Approve user is redirected to `client` endpoint (provider+"/securelogin" by default):
+After clicking Login the client makes a GET request or opens in the browser (depends on `callback` type):
 
 `https://my.app/securelogin?response=TOKEN,REGISTRATION&state=STATE`
 
 `response` parameter is csv of TOKEN=`SIG.BODY` and REGISTRATION=`FIRSTKEY,SECONDKEY,PUBKEY,SHAREDSECRET` (returned only for empty-scope login requests)
 
-### Step 4. Verification
-
-First, you need to check if this tfid already exists in your database. You can get it from TOKEN's body which is csv of: tfid, provider, client, scope, expire_at. If it doesn't, create a new user with  `User.create email: tfid, securelogin: REGISTRATION`
+First, you need to check if this `pubkey` already exists in your database. You can get it from TOKEN's body which is csv of: pubkey, provider, client, scope, expire_at. If it doesn't, create a new user with.
 
 You may sign in user right away to freshly created account, but it's better to go through regular sign in procedure for smoke-testing.
 
@@ -183,9 +166,9 @@ After verifying all fields of the token you can sign user in or perform the acti
 
 ### SDK, implementations and libraries
 
-<a href="https://securelogin.pw/sdk.js">JS SDK to include in your login page</a>
+<a href="https://securelogin.pw/sdk.js">JS SDK</a> - tiny JS helper. Please do not hot-link and use self-hosted code. 
 
-<a href="https://github.com/homakov/cobased">Ruby on Rails implementation demo</a>.
+<a href="https://github.com/homakov/cobased">Ruby on Rails implementation demo</a>
 
 
 ### Adoption Strategy
@@ -203,20 +186,31 @@ After verifying all fields of the token you can sign user in or perform the acti
 
 
 
-### FAQ
-
-* Like in all password managers, there's no way to recover your private key without password or recovery key. There's common misunderstanding that email is any different: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
-
-* Although the web version exists, no one should use it for anything serious. Users must install native clients which don't depend on securelogin.pw web server and generate private key much faster than JavaScript.
 
 
 
+## Direct vs Ping callback
 
-# Technical Documentation
+After opening a tab with client callback, it gets closed after setting localStorage response token. Sometimes the user has other tabs open after the original tab and the browser switches to last one, not the tab that requested SecureLogin authentication. The only known way to re-focus is to alert() which is inconvenient. 
 
-## Build
 
-### Cordova
+## FAQ
+
+* Master password is single point of failure in your system
+
+Yes, like in all password managers, there's no way to recover your private key without password or recovery key. 
+
+There's common misunderstanding that email is any different: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
+
+In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we just remove unnecessary levels of "backups" and "recovery codes", our scheme boils down to just one master password.
+
+* Web version is easier to use. Why install native apps?
+
+Although the web version exists, no one should use it for anything serious. Users must install native clients which don't depend on securelogin.pw web server and generate private key much faster than JavaScript.
+
+
+
+## Building Cordova apps
 
 
 ```
@@ -238,12 +232,6 @@ Problem? Remove and add.
 
 cordova platform remove ios;cordova platform add ios
 
-# Roadmap
-
-
-## 1. More smooth navigation back to initial page
-
-After opening a tab with client callback, it gets closed after setting localStorage response token. Sometimes the user has other tabs open after the original tab and the browser switches to last one, not the tab that requested SecureLogin authentication. The only known way to re-focus is to alert() which is inconvenient. 
 
 
 ## 2. Invest in more efficient derivation
@@ -260,10 +248,8 @@ Proper logo and improve graphical design.
 
 While Cordova and Electron are usable, SecureLogin is a small enough app that is cheap to implement for every platform using native architecture.
 
-
 ## 5. Verifiable builds
 Get https://reproducible-builds.org/ for all platforms
-
 
 
 

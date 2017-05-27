@@ -286,6 +286,10 @@ function messageDispatcher(message){
     m.client = m.provider + '/securelogin'
   }
 
+  if(m.callback!='ping'){
+    m.callback = 'direct'
+  }
+
   if(m.scope){
     if(m.scope.length > 10000){
       errors.push("scope to sign is longer than 10000.")
@@ -396,7 +400,7 @@ function messageDispatcher(message){
 
     var response_obj = {
       state: m.state,
-      act: m.ping?'ping':'localstorage',
+      act: m.callback,
       response: csv([
         token,
         csv([sign(token, Benc(getAccount().shared_key.secretKey)), hmac(shared_secret, token)]),
@@ -410,7 +414,7 @@ function messageDispatcher(message){
 
     var callback = m.client + "?" + toQuery(response_obj)
     
-    if(m.ping){
+    if(m.callback=='ping'){
       //alert('pinging '+callback);
       ping.src = callback
       ping.onload = function(){
@@ -522,9 +526,9 @@ window.onload = (function(){
           localStorage.current_profile = Accounts.push(new_account) - 1;
           main()
 
-          if(Accounts.length == 1 && !inweb){
-            redirect('https://securelogin.pw/#native');
-          }
+          //if(Accounts.length == 1 && !inweb){
+          //  redirect('https://securelogin.pw');
+          //}
         }
         if(Accounts.length > 0){
           // already accepted

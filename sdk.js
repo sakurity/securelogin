@@ -1,10 +1,3 @@
-//openssl dgst -sha384 -binary sdk.js | openssl base64 -A
-
-
-window.addEventListener('load', function(){
-
-})
-
 SecureLogin = function(callback, scope){
   SecureLogin.toQuery=function(obj) {
     return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
@@ -22,6 +15,9 @@ SecureLogin = function(callback, scope){
   }
   if(SecureLogin.confirmed){
     request.confirmed = 1
+  }
+  if(SecureLogin.callback){
+    request.callback = SecureLogin.callback
   }
   
   if(scope){
@@ -48,28 +44,27 @@ SecureLogin = function(callback, scope){
 
 
   c.interval = setInterval(function(){
-    if(SecureLogin.ping){
+    if(SecureLogin.callback=='ping' && document.visibilityState=='visible'){
       var ping = new XMLHttpRequest()
-      ping.open('get','/securelogin?act=get&state='+request.state);
+      ping.open('GET','/securelogin?act=get&state='+request.state)
+      ping.send()
       ping.onreadystatechange = function(){
-        if(ping.readyState==4){
+        if(ping.readyState==4 && ping.responseText.length>5){
+          clearInterval(c.interval);
           c.cb(ping.responseText);
+          delete(c.cb)
         }
-      }
-
-    }else{
-
-
-      var response = localStorage["securelogin_"+request.state];
-      if(response){
-        if(c.w){c.w.close()}
-        window.focus()
-        delete(localStorage["securelogin_"+request.state])
-        clearInterval(c.interval);
-        c.cb(response);
       }
     }
 
-  }, 500)
+    var response = localStorage["securelogin_"+request.state];
+    if(response){
+      if(c.w){c.w.close()}
+      window.focus()
+      delete(localStorage["securelogin_"+request.state])
+      clearInterval(c.interval);
+      c.cb(response);
+    }
+  }, 300)
 }
 
