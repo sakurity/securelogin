@@ -8,7 +8,7 @@ SecureLogin is decentralized authentication protocol for websites and apps. Clas
 
 Here are 5 major problems it solves:
 
-1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It is working for everyone, not just for the geeks.
+1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It is working for everyone, not only for the geeks.
 
 2. __Usability__: existing onboarding process is a disaster for conversion: Email, confirm email, password, confirm password, wait you need one digit and one capital letter, think of a new password, sign up and go to email box to click "Confirm My Email" a 1000th time in your life. **With SecureLogin, it's just two clicks.**
 
@@ -138,31 +138,9 @@ derived_root = require("scrypt").hashSync("firstpassword",{"N":Math.pow(2,18),"r
 
 After clicking Login the client makes a GET request or opens in the browser (depends on `callback` type):
 
-`https://my.app/securelogin?response=TOKEN,REGISTRATION&state=STATE`
+`https://my.app/securelogin?response=TOKEN&state=STATE`
 
-`response` parameter is csv of TOKEN=`SIG.BODY` and REGISTRATION=`FIRSTKEY,SECONDKEY,PUBKEY,SHAREDSECRET` (returned only for empty-scope login requests)
-
-First, you need to check if this `pubkey` already exists in your database. You can get it from TOKEN's body which is csv of: pubkey, provider, client, scope, expire_at. If it doesn't, create a new user with.
-
-You may sign in user right away to freshly created account, but it's better to go through regular sign in procedure for smoke-testing.
-
-For sign in just verify validity of SIG for BODY using PUBKEY. Example in Ruby:
-
-`RbNaCl::VerifyKey.new(dec(PUBKEY)).verify(dec(SIG), BODY) rescue error = 'Wrong signature'`
-
-Then check that this TOKEN was created for your client with proper scope
-
-```
-error = "Invalid provider" unless %w{http://c.dev https://cobased.com}.include? provider
-
-error = "Invalid client" unless %w{http://c.dev/securelogin https://cobased.com/securelogin}.include? client
-
-error = "Expired token #{expire_at} #{message}" unless expire_at.to_i > Time.now.to_i
-
-error = "Invalid scope" unless scope == ''
-```
-
-After verifying all fields of the token you can sign user in or perform the action allowed in scope parameter.
+Verification code can be copied from <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">here</a>
 
 ### SDK, implementations and libraries
 
@@ -179,13 +157,9 @@ After verifying all fields of the token you can sign user in or perform the acti
 
 3. Engage with users and see what's unclear/buggy to them.
 
-
 4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
 
 5. SecureLogin Wallet generates addresses and mnemonic for major cryptocurrencies
-
-
-
 
 
 
@@ -196,7 +170,15 @@ After opening a tab with client callback, it gets closed after setting localStor
 
 ## FAQ
 
-* Master password is single point of failure in your system
+### 1. Password managers already exist, what's the point?
+
+First, market penetration rate of password managers is a joke - less than 1%. You may use it, some of your friends may use it, but the rest of the world does not and will not. They are not enforceable on your users. 
+
+Second, they are very inconvenient, especially on mobile. They try to look like a human, looking for inputs and prefilling them. SecureLogin makes websites to implement well defined authentication protocol instead. The good ones are not even open source and cost money. 
+
+But more importantly, they do not solve a problem that all our accounts belong to centralized email services via "Reset my password" functionality.
+
+### 2. Master password is single point of failure in this system
 
 Yes, like in all password managers, there's no way to recover your private key without password or recovery key. 
 
@@ -204,7 +186,7 @@ There's common misunderstanding that email is any different: try to reset your G
 
 In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we just remove unnecessary levels of "backups" and "recovery codes", our scheme boils down to just one master password.
 
-* Web version is easier to use. Why install native apps?
+### 3. Web version is easier to use. Why install native apps?
 
 Although the web version exists, no one should use it for anything serious. Users must install native clients which don't depend on securelogin.pw web server and generate private key much faster than JavaScript.
 
@@ -251,8 +233,3 @@ While Cordova and Electron are usable, SecureLogin is a small enough app that is
 ## 5. Verifiable builds
 Get https://reproducible-builds.org/ for all platforms
 
-
-
-## Wordings
-
-"master password" must be used everywhere instead of just password to distinguish. "passphrase" is too unpopular.
