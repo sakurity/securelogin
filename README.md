@@ -150,9 +150,11 @@ After clicking Login the client sends signed `sltoken` to `client` URL on your s
 
 First, market penetration rate of password managers is a joke - less than 1%. You may use it, some of your friends may use it, but the rest of the world does not and will not. They are not enforceable on your users. 
 
-Second, they are very inconvenient, especially on mobile. They try to look like a human, looking for inputs and prefilling them. SecureLogin makes websites to implement well defined authentication protocol instead. The good ones are not even open source and cost money. 
+Second, they are very inconvenient, especially on mobile. They try to look like a human, looking for inputs and prefilling them. SecureLogin makes websites to implement well defined authentication protocol instead. 
 
-But more importantly, they do not solve a problem that all our accounts belong to centralized email services via "Reset my password" functionality.
+**Most popular managers are not even open source and cost money.** Using closed-source software is a giant no-no for this kind of product.
+
+But more importantly, they do not solve the problem that all our accounts belong to centralized email services via "Reset my password" functionality.
 
 ### 2. Master password is single point of failure in this system
 
@@ -170,11 +172,11 @@ Although the web version exists, no one should use it for anything serious. User
 
 The protocol and the client are completely open source. They are free now and they will remain free in the future. There is no monetization plan except the one where Sakurity gets more clients for saving the Internet from two-decades long problem.
 
-It is not even technically possible to start charging money for anything: the protocol works client side, no external servers, no API.
+It is not even technically possible to start charging money for anything: the protocol works client side, no external servers, no API. It's not a promise, it's a fact.
 
 ### 5. Is it only for websites? What if we have a mobile app?
 
-It supports desktop and native apps as well. But due to the fact that custom protocols are not registered in a public repository like domains, provider/client parameters are limited to web origin format. You're free to redirect back to your app:// from your web-based `client`
+It supports desktop and native apps as well. But due to the fact that custom protocols are not registered in a public repository like domains, provider/client parameters are limited to web origin format. You're free to pass `sltoken` back to your app:// from your web-based `client` URL.
 
 ### 6. Can it be trusted? What if there's a backdoor?
 
