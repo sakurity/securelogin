@@ -112,9 +112,10 @@ Please note, password manager are not in the table because there's no such thing
   </tr>
 </table>
 
-### How it works?
 
-"Secure Login" button on your website/app opens SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
+# How it works?
+
+The "Secure Login" button on your website/app opens SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
 
 **`provider`** - required. Use origin of your app eg https://my.app
 
@@ -143,22 +144,6 @@ After clicking Login the client sends signed `sltoken` to `client` URL on your s
 <a href="https://github.com/homakov/cobased">Ruby on Rails implementation demo</a>
 
 
-### Adoption Strategy
-
-1. Target developer community (hence everything is on Github and there is no marketing site). Only developers can validate the idea and decide to implement it
-
-2. Focus on SDK libaries and plugins for major CMS/frameworks/languages
-
-3. Engage with users and see what's unclear/buggy to them.
-
-4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
-
-5. In the future, V2 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
-
-## Direct vs Ping callback
-
-After opening a tab with client callback, it gets closed after setting localStorage response token. Sometimes the user has other tabs open after the original tab and the browser switches to last one, not the tab that requested SecureLogin authentication. The only known way to re-focus is to alert() which is inconvenient. 
-
 ## FAQ
 
 ### 1. Password managers already exist, what's the point?
@@ -181,9 +166,24 @@ In the end of any authentication scheme there will be a password that you just c
 
 Although the web version exists, no one should use it for anything serious. Users must install native clients which don't depend on securelogin.pw web server and generate private key much faster than JavaScript.
 
+### 4. Is it open source? Will it be free in the future?
+
+The protocol and the client are completely open source. They are free now and they will remain free in the future. There is no monetization plan except the one where Sakurity gets more clients for saving the Internet from two-decades long problem.
+
+It is not even technically possible to start charging money for anything: the protocol works client side, no external servers, no API.
+
+### 5. Is it only for websites? What if we have a mobile app?
+
+It supports desktop and native apps as well. But due to the fact that custom protocols are not registered in a public repository like domains, provider/client parameters are limited to web origin format. You're free to redirect back to your app:// from your web-based `client`
+
+### 6. Can it be trusted? What if there's a backdoor?
+
+Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds in as soon as possible.
 
 
 ## Cordova
+
+Cordova is used for iOS and Android platforms. It's not exactly a smooth platform, and there will be native clients in the future, but it does the job.
 
 ```
 cordova create sl SecureLogin
@@ -203,23 +203,39 @@ cordova run ios
 
 ## Electron
 
+Electron is employed for macOS, Windows and Linux apps.
+
 `electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=./electron.icns`
 
-## 2. Invest in more efficient derivation
+
+
+
+
+## Roadmap
+
+1. Target developer community (hence everything is on Github and there is no marketing site). Only developers can validate the idea and decide to implement it
+
+2. Focus on SDK libaries and plugins for major CMS/frameworks/languages
+
+3. Engage with users and see what's unclear/buggy to them.
+
+4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
+
+5. In the future, V2 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
+
+6. Invest in more efficient derivation
 
 Inconsistent derivation is an issue among all platforms, especially for mobile. In the future current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 ). Move to Argon2.
 
-
-## 3. Design and branding
+7. Design and branding
 
 Proper logo and improve graphical design.
 
-
-## 4. Implement native apps for iOS and Android
+8. Implement native apps for iOS and Android
 
 While Cordova and Electron are usable, SecureLogin is a small enough app that is cheap to implement for every platform using native architecture.
 
-## 5. Verifiable builds
+9. Verifiable builds
 
 Get https://reproducible-builds.org/ for all platforms
 
