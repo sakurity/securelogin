@@ -1,21 +1,18 @@
 <html manifest="/s.appcache"><body><script>
 c = localStorage.client;
 slw = 'https://securelogin.pw/'
-
+pr = 'securelogin://'
 if(top == window){
-  if(c && c != slw){
-    if(c == 'securelogin://'){
-      location = c+location.hash+'&native=1'
-      setTimeout(function(){
-        window.close()
-      },100)
-    }else{
-      location = c+location.hash
-    }
+  if(c && c == pr){
+    location = c+location.hash
+    setTimeout(function(){
+      window.close()
+    },100)
   }else{
     location = slw+location.hash
   }
 }else{
-  parent.postMessage(c,'*');
+  // always undefined for safari
+  parent.postMessage({client: c},'*');
 }
 </script></body></html>

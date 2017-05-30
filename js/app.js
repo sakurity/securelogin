@@ -86984,6 +86984,7 @@ rippleKeypairs = require('ripple-keypairs');
 
 show($('.dev'))
 
+L = getProfile(localStorage.current_profile)
 
 // legacy password generator. We don't really want to expose it because we actually want to kill passwords
 
@@ -86997,7 +86998,7 @@ function copypassword(){
 }
 
 function manager(){
-  var pw = hmac(getAccount().shared_base, managerprovider.value.toLowerCase() )
+  var pw = hmac(L.shared_base, managerprovider.value.toLowerCase() )
   pw = pw.replace(/[=\/+]/g,'').slice(0,12)
   managerpassword.value = pw
 }
@@ -87046,11 +87047,11 @@ coins = {
 
 // deterministic offline address generator for major cryptocurrencies
 
-secretkey.value = localStorage.accounts
+secretkey.value = localStorage.profiles
 
 
 for(var symbol in coins){
-  var base = Bdec(hmac(symbol, getAccount().shared_base))
+  var base = Bdec(hmac(symbol, L.shared_base))
   console.log(symbol, base)
   window[symbol].value = coins[symbol].generate(base)
 }

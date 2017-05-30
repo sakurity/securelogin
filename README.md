@@ -184,7 +184,7 @@ Yes, like in all password managers, there's no way to recover your private key w
 
 There's common misunderstanding that email is any different: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
 
-In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we just remove unnecessary levels of "backups" and "recovery codes", our scheme boils down to just one master password.
+In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we removed unnecessary levels of "backups" and "recovery codes", our scheme boils down to one master password, not to master password **and** backup file/paper/SIM card/email account etc. 
 
 ### 3. Web version is easier to use. Why install native apps?
 
@@ -194,9 +194,7 @@ Although the web version exists, no one should use it for anything serious. User
 
 ## Building Cordova apps
 
-
 ```
-
 cordova create sl SecureLogin
 cd sl
 
@@ -206,19 +204,19 @@ cordova platform add ios
 cordova plugin add https://github.com/Crypho/cordova-plugin-scrypt.git
 cordova plugin add cordova-plugin-customurlscheme --variable URL_SCHEME=securelogin
 cordova plugin add cordova-plugin-splashscreen
+cordova plugin add cordova-plugin-whitelist
+cordova plugin add cordova-plugin-device
 
 cordova run ios
 ```
 
-Problem? Remove and add.
+## Electron
 
-cordova platform remove ios;cordova platform add ios
-
-
+`electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=./electron.icns`
 
 ## 2. Invest in more efficient derivation
 
-Inconsistent derivation is an issue among all platforms, especially for mobile. In the future current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 )
+Inconsistent derivation is an issue among all platforms, especially for mobile. In the future current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 ). Move to Argon2.
 
 
 ## 3. Design and branding

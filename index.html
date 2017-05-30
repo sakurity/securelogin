@@ -4,6 +4,8 @@
     <title>SecureLogin</title>
     <meta charset="utf-8">
 
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src * 'self' data: content:; connect-src *;">
+
     <meta property="og:title" content="SecureLogin" />
     <meta property="og:description" content="Decentralized Password Replacement" />
     <meta property="og:image" content="./icon-60@2x.png" />
@@ -18,6 +20,9 @@
 
   </head>
   <body>
+
+    <p class="ios h" style=" max-width: 300px;border-radius: 5px;">↑ Done! Touch ◄ to go back.</p>
+
     <div class="container">
       <div class="generation screen splash h">
         <img class="logo" src="./icon-60@2x.png">
@@ -40,7 +45,7 @@
         </div>
 
         <div class="step2 h">
-          <p> 3rd parties cannot compromise your accounts anymore without your master password. You entirely own your identity: SecureLogin is authentication without a middle man.</p>
+          <p>3rd parties cannot compromise your accounts anymore without your master password. You entirely own your identity: SecureLogin is authentication without a middle man.</p>
 
           <p>Last step: visit SecureLogin.pw in your browser and click the button that you installed our app</p>
 
@@ -59,48 +64,51 @@
       <div class="app-auth-screen auth screen h">
         <div class="app"><h2 class="app-name"></h2></div>
         <p>
-          <div class="settings-control-group accounts h">
+          <div class="settings-control-group profiles h">
             <label class="settings-control-label">Using profile:</label>
-            <select class="settings-control-input" id="accountlist"></select>      
+            <select class="settings-control-input" id="profilelist"></select>      
           </div>
         </p>
 
-        <div class="settings-control-group changeaccounts h">
+        <div class="settings-control-group changeprofiles h">
           <center><img src="img/downarrow.png" width="50px"></center>
           <label class="settings-control-label">Change to profile:</label>
-          <select class="settings-control-input" id="changeaccountlist"></select>     
+          <select class="settings-control-input" id="changeprofilelist"></select>     
         </div>
 
         <div class="auth-data h"></div>
-        <a class="b approve green">Login</a>
+        <button class="b approve green">Login</button>
       </div>
 
 
       <div class="app-list-screen list screen h">
         <div class="splash add-margin">
-          <img class="logo" src="./icon-60@2x.png" onclick="loaddev()">
+          <img class="logo loaddev" src="./icon-60@2x.png">
 
           <div class="in-web">
             <p>Forget about passwords with SecureLogin</p>
             
 
-            <p><a href=""><img src="img/appstore.svg" class="store"></a><br>
-            <a href=""><img src="img/googleplay.png" class="store"></a><br>
-            <a href=""><img src="img/macappstore.svg" class="store"></a><br>
-            <a href=""><img src="img/windowsstore.png" class="store"></a></p>
+            <p><a class="native" href="https://play.google.com/store/apps/details?id=pw.securelogin"><img src="img/googleplay.png" class="store"></a><br>
+            <a href="/SecureLogin.dmg" class="native">SecureLogin for macOS</a></p>
+            <!--
+            <a class="h"  href=""><img src="img/appstore.svg" class="store"></a><br>
+            <br>
+            <a class="h" href=""><img src="img/macappstore.svg" class="store"></a><br>
+            <a class="h"  href=""><img src="img/windowsstore.png" class="store"></a></p>
+            -->
 
 
-            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a>. You may also <a href="javascript:enableweb();">enable experimental web client</a></p>
+            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a>
 
-            <p><a class="b native slbutton">SecureLogin app is already installed?</a></p>
-
+            <p><a class="b enableweb slbutton">Use Web client</a></p>
           </div>
 
 
           <div class="settings-control-group main-form h">
             <label class="settings-control-label">Default profile:</label>
-            <select class="settings-control-input" id="accountsmain"></select>
-            <a class="b red slbutton" onclick="logout()">Log out of this profile</a>
+            <select class="settings-control-input" id="profilesmain"></select>
+            <a class="b red slbutton logoutprofile">Log out of this profile</a>
           </div>
 
           <div class="settings-control-group login-form">
@@ -118,14 +126,12 @@
 
           <div class="settings-control-group dev h" style="font-size:14px">
 
-            <h2>WARNING: experimental features</h2>
-
             <p>Legacy Password Generator</p>
-            <p><input type="text" id="managerprovider" class="settings-control-input" placeholder="Website or app name e.g. 'twitter' " onchange="manager()" onkeyup="manager()"></p>
-            <p><input type="text" id="managerpassword" class="settings-control-input" onclick="copypassword()" placeholder="Click to copy generated password"></p>
+            <p><input type="text" id="managerprovider" class="settings-control-input" placeholder="Website or app name e.g. 'twitter' "></p>
+            <p><input type="text" id="managerpassword" class="settings-control-input" placeholder="Click to copy generated password"></p>
             <small class="h" id="copymessage">Copied</small>         
 
-            <p>Accounts dump</p>
+            <p>Profiles dump</p>
             <input id="secretkey" class="settings-control-input">
 
             <p>Bitcoin</p>

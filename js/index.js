@@ -12,26 +12,6 @@ rippleKeypairs = require('ripple-keypairs');
 
 // experimental dev features, revealed on double click
 
-show($('.dev'))
-
-
-// legacy password generator. We don't really want to expose it because we actually want to kill passwords
-
-function copypassword(){
-  managerpassword.select();
-  document.execCommand('copy');
-  show(copymessage);
-  setTimeout(function(){
-    hide(copymessage)
-  },1000)
-}
-
-function manager(){
-  var pw = hmac(getAccount().shared_base, managerprovider.value.toLowerCase() )
-  pw = pw.replace(/[=\/+]/g,'').slice(0,12)
-  managerpassword.value = pw
-}
-
 
 coins = {
   btc: {
@@ -76,11 +56,11 @@ coins = {
 
 // deterministic offline address generator for major cryptocurrencies
 
-secretkey.value = localStorage.accounts
+secretkey.value = localStorage.profiles
 
 
 for(var symbol in coins){
-  var base = Bdec(hmac(symbol, getAccount().shared_base))
+  var base = Bdec(hmac(symbol, L.shared_base))
   console.log(symbol, base)
   window[symbol].value = coins[symbol].generate(base)
 }
