@@ -209,8 +209,6 @@ Electron is employed for macOS, Windows and Linux apps.
 
 
 
-
-
 ## Roadmap
 
 1. Target developer community (hence everything is on Github and there is no marketing site). Only developers can validate the idea and decide to implement it
@@ -238,4 +236,13 @@ While Cordova and Electron are usable, SecureLogin is a small enough app that is
 9. Verifiable builds
 
 Get https://reproducible-builds.org/ for all platforms
+
+10. Setup Bug Bounty program
+
+11. Make sure people don't forget master passwords
+
+This is very important since target audience is "general public": we need to draw a line between Legacy Passwords they could forget and used entire life and Master Passwords that you need just one, but **cannot forget**. Hygiene is completely different.
+
+Track usage and remind after 3, 10 and 30 successful signins to try to type master password again.
+
 
