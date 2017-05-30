@@ -73,8 +73,6 @@ Please note, password manager are not in the table because there's no such thing
     <td class=g1><a href="https://duo.com/pricing">$3+/mo/user</a>, <a href="https://www.authy.com/product/pricing/">$0.1/request</a>, $0.05/SMS</td>
   </tr>
 
-
-
   <tr>
     <td>Magic Link on Email / Mozilla Persona</td>
     <td class=g3>No per-site passwords - no reuse</td>
@@ -114,33 +112,29 @@ Please note, password manager are not in the table because there's no such thing
   </tr>
 </table>
 
-### Step 1. Open SecureLogin client
+### How it works?
 
-"Secure Login" button opens a window `https://securelogin.pw/s#provider=https://my.app&state=STATE`. `/s` is a proxy URL that runs a native app `securelogin://provider=https://my.app&state=STATE` for existing SecureLogin users or redirects to Web version for new users (where they can also choose and download a native client).
-
-Parameters:
+"Secure Login" button on your website/app opens SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
 
 **`provider`** - required. Use origin of your app eg https://my.app
 
-**`state`** - required. Use a random string, save locally and verify that `state` from response is equal `state` from localStorage/cookies/etc to prevent CSRF.
+**`state`** - required. Usage depends on type of callback you're using: `ping` or direct. For `ping` use a random string and send it along with your request. SecureLogin app will send signed `sltoken` to your server callback with exact `state` so your first request can proceed.
 
-`callback` - `direct` by default or `ping` (recommended). `direct` callback opens `client` URL in the system browser. Ping response makes a GET request to that URL instead. Read Ping vs Direct explanation below. 
+`callback` - `direct` by default or `ping` (recommended). `direct` callback opens `client` URL in the system browser. Ping response makes internal GET request to `client` URL instead. Read Ping vs Direct explanation below.
 
-`client` - defaults to provider+'/securelogin', URL which will be opened or pinged (depends on `response` option), consumer of the token.  It's recommended to use default `/securelogin` but you may send any path on your domain.
+`client` - defaults to provider+'/securelogin', URL which will be opened or pinged (depends on `callback` setting), consumer of the token.  It's recommended to use default `/securelogin` but you may send any path on your domain.
 
-`scope` - defaults to empty string, for regular sign-in functionality. Some applications may want to use it to sign critical requests such as money transfer: `Action=Delete%20Account` or `Action=Money%20Transfer&Amount=1.3&Address=FRIEND`
+`scope` - defaults to empty string, for regular sign-in functionality. However, financial services may benefit from signing critical requests such as money transfer: `Action=Delete%20Account` or `Action=Money%20Transfer&Amount=1.3&Address=FRIEND`
 
-New users should type an email and master password. It runs key derivation function (scrypt) with `logN=18 p=6` and takes up to 20 seconds. Then SecureLogin warns the user to either remember their password or write it down.
+New users should type an email and **master password**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. The keypair derivation is deterministic: running following code will generate the same hash on any machine:
 
 ```
-derived_root = require("scrypt").hashSync("firstpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"email").toString("base64")
+derived_root = require("scrypt").hashSync("masterpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"user@email.com").toString("base64")
 ```
 
-After clicking Login the client makes a GET request or opens in the browser (depends on `callback` type):
+Existing users will get a screen with `provider` on top and a Login button.
 
-`https://my.app/securelogin?response=TOKEN&state=STATE`
-
-Verification code can be copied from <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">here</a>
+After clicking Login the client sends signed `sltoken` to `client` URL on your server. Verification code looks like <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">this</a>
 
 ### SDK, implementations and libraries
 
@@ -151,22 +145,19 @@ Verification code can be copied from <a href="https://github.com/homakov/cobased
 
 ### Adoption Strategy
 
-1. Target developer community (hence everything is on Github and there is no marketing site). Only developer can validate the idea and decide to implement it
+1. Target developer community (hence everything is on Github and there is no marketing site). Only developers can validate the idea and decide to implement it
 
-2. Grow SDK libaries and plugins for major CMS/frameworks/languages
+2. Focus on SDK libaries and plugins for major CMS/frameworks/languages
 
 3. Engage with users and see what's unclear/buggy to them.
 
 4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
 
-5. SecureLogin Wallet generates addresses and mnemonic for major cryptocurrencies
-
-
+5. In the future, V2 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
 
 ## Direct vs Ping callback
 
 After opening a tab with client callback, it gets closed after setting localStorage response token. Sometimes the user has other tabs open after the original tab and the browser switches to last one, not the tab that requested SecureLogin authentication. The only known way to re-focus is to alert() which is inconvenient. 
-
 
 ## FAQ
 
@@ -192,7 +183,7 @@ Although the web version exists, no one should use it for anything serious. User
 
 
 
-## Building Cordova apps
+## Cordova
 
 ```
 cordova create sl SecureLogin
@@ -229,5 +220,6 @@ Proper logo and improve graphical design.
 While Cordova and Electron are usable, SecureLogin is a small enough app that is cheap to implement for every platform using native architecture.
 
 ## 5. Verifiable builds
+
 Get https://reproducible-builds.org/ for all platforms
 
