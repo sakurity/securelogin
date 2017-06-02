@@ -501,20 +501,8 @@ function hexToBase64(hexstring) {
     }).join(""));
 }
 
-function copypassword(){
-  managerpassword.select();
-  document.execCommand('copy');
-  show(copymessage);
-  setTimeout(function(){
-    hide(copymessage)
-  },1000)
-}
 
-function manager(){
-  var pw = hmac(L.shared_base, managerprovider.value.toLowerCase() )
-  pw = pw.replace(/[=\/+]/g,'').slice(0,12)
-  managerpassword.value = pw
-}
+
 
 
 // prevent backclickjack
@@ -527,11 +515,27 @@ window.onload = (function(){
     main()
   }
 
+  legacypw = function(){
+    var base = getProfile(localStorage.current_profile).shared_base
+    var pw = hmac(base, $('.managerprovider').value.toLowerCase() )
+    pw = pw.replace(/[=\/+]/g,'').slice(0,12) + "!"
+    $('.managerpassword').value = pw
+  }
+  $('.managerprovider').oninput = legacypw
+
+  $('.managerpassword').onclick=function(){
+    $('.managerpassword').select();
+    document.execCommand('copy');
+    show('.copymessage');
+    setTimeout(function(){
+      hide('.copymessage')
+    },1000)
+  }
+
+
   $('.loaddev').onclick = function(){
     if(localStorage.current_profile && confirm("Open experimental features?")){
       show($('.dev'))
-      managerprovider.onkeyup=manager
-      managerpassword.onclick=copypassword()
 
       var s = document.createElement('script')
       s.src = 'js/app.js'

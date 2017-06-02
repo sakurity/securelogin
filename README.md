@@ -115,17 +115,11 @@ Please note, password manager are not in the table because there's no such thing
 
 # How it works?
 
-The "Secure Login" button on your website/app opens SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
+The "Secure Login" button on your website/app opens native SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
 
 **`provider`** - required. Use origin of your app eg https://my.app
 
-**`state`** - required. Usage depends on type of callback you're using: `ping` or direct. For `ping` use a random string and send it along with your request. SecureLogin app will send signed `sltoken` to your server callback with exact `state` so your first request can proceed.
-
-`callback` - `direct` by default or `ping` (recommended). `direct` callback opens `client` URL in the system browser. Ping response makes internal GET request to `client` URL instead. Read Ping vs Direct explanation below.
-
-`client` - defaults to provider+'/securelogin', URL which will be opened or pinged (depends on `callback` setting), consumer of the token.  It's recommended to use default `/securelogin` but you may send any path on your domain.
-
-`scope` - defaults to empty string, for regular sign-in functionality. However, financial services may benefit from signing critical requests such as money transfer: `Action=Delete%20Account` or `Action=Money%20Transfer&Amount=1.3&Address=FRIEND`
+**`state`** - required. Generate a random string. SecureLogin app will ping `https://my.app/securelogin?state=STATE&response=SLTOKEN` while your initial request is waiting for SLTOKEN.
 
 New users should type an email and **master password**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. The keypair derivation is deterministic: running following code will generate the same hash on any machine:
 
@@ -183,6 +177,8 @@ It supports desktop and native apps as well. But due to the fact that custom pro
 Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds in as soon as possible.
 
 
+
+
 ## Cordova
 
 Cordova is used for iOS and Android platforms. It's not exactly a smooth platform, and there will be native clients in the future, but it does the job.
@@ -207,7 +203,18 @@ cordova run ios
 
 Electron is employed for macOS, Windows and Linux apps.
 
-`electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=./electron.icns`
+```
+electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
+
+
+electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
+
+
+electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
+
+electron-osx-flat SecureLogin-mas-x64/SecureLogin.app
+```
+
 
 
 
@@ -246,5 +253,9 @@ Get https://reproducible-builds.org/ for all platforms
 This is very important since target audience is "general public": we need to draw a line between Legacy Passwords they could forget and used entire life and Master Passwords that you need just one, but **cannot forget**. Hygiene is completely different.
 
 Track usage and remind after 3, 10 and 30 successful signins to try to type master password again.
+
+
+12. Use secure enclaves for localStorage or analogs
+
 
 

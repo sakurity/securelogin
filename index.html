@@ -20,9 +20,6 @@
 
   </head>
   <body>
-
-    <p class="ios h" style=" max-width: 300px;border-radius: 5px;">↑ Done! Touch ◄ to go back.</p>
-
     <div class="container">
       <div class="generation screen splash h">
         <img class="logo" src="./icon-60@2x.png">
@@ -87,7 +84,6 @@
 
           <div class="in-web">
             <p>Forget about passwords with SecureLogin</p>
-            
 
             <p><a class="native" href="https://play.google.com/store/apps/details?id=pw.securelogin"><img src="img/googleplay.png" class="store"></a><br>
             <a href="/SecureLogin.dmg" class="native">SecureLogin for macOS</a></p>
@@ -106,34 +102,39 @@
 
 
           <div class="settings-control-group main-form h">
+            <p>Legacy Password Generator</p>
+            <p style="font-size:14px">Here you can generate a password for websites that <b>don't support SecureLogin yet</b> and still rely on insecure legacy passwords</p>
+            <p><input type="text" class="settings-control-input managerprovider" placeholder="Website or app name e.g. 'twitter' "></p>
+            <p><input type="text" class="settings-control-input managerpassword copyable" placeholder="Click to copy the generated password"></p>
+            <p class="h copymessage">Copied!</p>         
+
+
+
+
+            <p><a href="https://sakurity.com/securelogin">Who supports SecureLogin now?</a></p>
+            <p style="font-size:14px">Follow the link to see up-to-date list of websites and apps implementing SecureLogin Protocol. Ask admin of your favorite website to support it too, it's really easy!</p>
+
+            
+
+
             <label class="settings-control-label">Default profile:</label>
             <select class="settings-control-input" id="profilesmain"></select>
             <a class="b red slbutton logoutprofile">Log out of this profile</a>
           </div>
 
           <div class="settings-control-group login-form">
-
             <p>Make sure you write down your master password and that you never used this password before.</p>
-
             <p><input required=true type="text" id="login" class="settings-control-input" placeholder="Email"></p>
             <input required=true type="password" id="password" class="settings-control-input" placeholder="Master Password">
             <a class="b real-sign-in slbutton">Add SecureLogin profile</a>
-
           </div>
 
 
 
 
           <div class="settings-control-group dev h" style="font-size:14px">
-
-            <p>Legacy Password Generator</p>
-            <p><input type="text" id="managerprovider" class="settings-control-input" placeholder="Website or app name e.g. 'twitter' "></p>
-            <p><input type="text" id="managerpassword" class="settings-control-input" placeholder="Click to copy generated password"></p>
-            <small class="h" id="copymessage">Copied</small>         
-
             <p>Profiles dump</p>
             <input id="secretkey" class="settings-control-input">
-
             <p>Bitcoin</p>
             <input id="btc" class="settings-control-input">
             <p>Mnemonic (use to import seeds)</p>
@@ -155,6 +156,9 @@
         </div>
       </div>
     </div>
+
+
+    <div class="ios h"></div>
     <img class="h" id="ping">
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/scrypt.js"></script>

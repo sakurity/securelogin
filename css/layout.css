@@ -1,4 +1,21 @@
 
+
+.ios{
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top:-50px;
+  left:-50px;
+  background: radial-gradient(red 20%, #fff 50%);
+}
+
+.copymessage{
+  padding: 10px;
+  background: yellow;
+  border-radius: 10px;
+  min-width: 300px;
+}
+
 /*
 .loading, .login {
   height: calc(100% - 110px);
