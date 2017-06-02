@@ -176,6 +176,38 @@ It supports desktop and native apps as well. But due to the fact that custom pro
 
 Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds in as soon as possible.
 
+## Compatibility & known issues
+
+The core functionality of SecureLogin is based on opening the native app, getting signed `sltoken` and returning user focus back to the same page. It's not easy at all.
+
+### macOS
+
+Chrome, Firefox: seamless experience. In Full Screen mode it's possible to focus back using alert() in Chrome (in Firefox alert does not focus)
+
+Safari: localStorage of /s proxy cannot detect users with native app (because of default privacy settings to drop 3rd party trackers). That's why we ask user to confirm(do you have app) everytime. Also no way to avoid 'Do you want to allow this page to open “SecureLogin.app”?' dialog every time. 
+
+TorBrowser: SecurityError: The operation is insecure.
+
+### Windows 10
+
+Edge: does not support custom protocol handlers like `securelogin://`. At all. Use Web version.
+
+Chrome: working fine.
+
+
+### Linux
+
+
+### iOS
+
+Safari: same as in Desktop safari, `/s` proxy does not work because localStorage is blocked for iframes.
+
+It's disallowed to simply close the app, so to go back to previous screen (Safari) user must press top left corner icon, which is really small and barely visible.
+
+
+### Android
+
+Chrome: seamless experience, but no way to minimize the app so need 2 seconds delay before going to previous screen
 
 
 
@@ -215,6 +247,11 @@ electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x
 electron-osx-flat SecureLogin-mas-x64/SecureLogin.app
 ```
 
+For Windows
+
+```
+electron-packager . "SecureLogin" --overwrite --arch=x64 --platform=win32
+```
 
 
 

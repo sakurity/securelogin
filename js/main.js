@@ -484,7 +484,14 @@ function derive(password, email, cb){
 
 
   if(E){
-    nodeRequire("scrypt").hash(password,opts,32,email).then(function(root){cb(root.toString("base64"))})
+    try{
+      // no success compiling scrypt for windows
+      window.npm_scrypt = nodeRequire("scrypt")
+    }catch(e){}
+  }
+
+  if(window.npm_scrypt){
+    npm_scrypt.hash(password,opts,32,email).then(function(root){cb(root.toString("base64"))})
   }else if(email!='force@scrypt.com' && window.plugins && window.plugins.scrypt){
     // sometimes we want to make sure native plugin is faster
     window.plugins.scrypt(function(root){cb(hexToBase64(root))}, alert, password, email, opts)

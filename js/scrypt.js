@@ -25,6 +25,7 @@ try{
 
   E = nodeRequire('electron')
   E.ipcRenderer.on('dispatchRequest', function(event, arg){
+    console.log(arg)
     clearTimeout(window.delayed_launch)
     var hash = arg.substr(arg.indexOf('#')+1)
     messageDispatcher(fromQuery(hash));
