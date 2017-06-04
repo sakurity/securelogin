@@ -1,5 +1,5 @@
 //npm install -g bs58 bitcoinjs-lib ecurve bigi ethereumjs-util buffer nem-sdk ripple-keypairs
-// browserify index.js --standalone npm > app.js
+// browserify index.js --standalone npm > experimental.js
 bip39 = require('bip39')
 base58 = require('bs58') 
 bitcoin = require('bitcoinjs-lib')
@@ -10,8 +10,8 @@ Buffer = require('buffer').Buffer
 nem = require("nem-sdk").default
 rippleKeypairs = require('ripple-keypairs');
 
-// experimental dev features, revealed on double click
-
+// experimental dev features, bundles to experimental.js, revealed on double click
+// not part of SecureLogin Protocol
 
 coins = {
   btc: {

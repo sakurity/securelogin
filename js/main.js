@@ -29,7 +29,7 @@ function main(){
 
 
 function getProfile(n){
-  //clone 
+  //clone profile, not modifying it
   var profile = Object.assign({}, Profiles[Number(n)])
 
   profile.shared_base = hmac(profile.root, 'shared');
@@ -45,6 +45,8 @@ function listProfiles(selected){
   var list = ''
   for(var i in Profiles){
     var o = Profiles[i]
+
+    // do we allow two profiles with equal Email? How to make them differ?
     var title = e(o.email) //+", added on "+o.date.substr(0,10) )
 
     list += '<option '+(Number(selected) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
@@ -57,8 +59,8 @@ function changeProfiles(except){
   var list = ''
   for(var i in Profiles){
     var o = Profiles[i]
-    var title = e(o.email) //+", added on "+o.date.substr(0,10) )
-    
+    var title = e(o.email)
+
     if(Number(except) != i)
     list += '<option value="'+i+'">'+title+'</option>'
   }
@@ -76,7 +78,6 @@ function logout(){
       localStorage.clear()
       location.hash = ''
       location.reload()
-
     }
   }
 }
@@ -163,12 +164,6 @@ function show(el){
   el.style.display='block'
 }
 
-// handy debugger hidden in the right bottom corner
-
-function l(m){
-  console.log(m)
-}
-
 // primarily used for `scope`
 
 toQuery=function(obj) {
@@ -236,6 +231,8 @@ function format(origin){
 
 // where everything happens
 function messageDispatcher(message){
+  // back to "baseline", if the app was left in another state
+
   hide('.ios')
   show('.container')
 
@@ -321,6 +318,7 @@ function messageDispatcher(message){
   }
 
   /*
+  TODO: SecureLogin server as central authority for email confirmation
   if(m.confirmed && !getProfile(use_i).confirmed){
     alert("Unconfirmed")
   }
@@ -545,7 +543,7 @@ window.onload = (function(){
       show($('.dev'))
 
       var s = document.createElement('script')
-      s.src = 'js/app.js'
+      s.src = 'js/experimental.js'
       document.body.appendChild(s)    
     }
   }
@@ -635,11 +633,12 @@ window.onload = (function(){
   $('.logoutprofile').onclick = logout
 
   $('.enableweb').onclick = function(){
-    if(confirm("SecureLogin Web client is much slower and less secure, try to install native app instead. Are you sure?")){
+    // this popup is considered annoying?
+    //if(confirm("SecureLogin Web client is much slower and less secure, try to install native app instead. Are you sure?")){
       show($('.login-form'))
       delete(localStorage.client)
       localStorage.web = 1
-    }
+    //}
   }
 
 
@@ -672,7 +671,7 @@ window.onload = (function(){
   }
   window.delayed_launch = setTimeout(main,800)
 
-  // smoke test
+  // smoke test. Previously Samsung returned wrong Scrypt hashes.
   //if(window.plugins){
   //  window.plugins.scrypt(function (res) { window.testscrypt = res; },function (err) { alert(err) },'password', 'salt', {N: 2})
   //}

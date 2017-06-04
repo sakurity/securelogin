@@ -363,6 +363,8 @@ Chrome: seamless experience, but no way to minimize the app so need 2 seconds de
 
 
 
+
+
 ## Cordova
 
 Cordova is used for iOS and Android platforms. It's not exactly a smooth platform, and there will be native clients in the future, but it does the job.
