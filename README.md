@@ -119,7 +119,7 @@ Please note, password manager are not in the table because there's no such thing
 
 First, let's include this tiny helper:
 
-```
+```javascript
 SecureLogin = function(scope){
   function toQuery(obj){
     return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
@@ -151,7 +151,7 @@ The "Secure Login" button on your website/app opens native SecureLogin app: `sec
 
 At the same time it sends a request to your `/login` action:
 
-```
+```javascript
 loginaccount.onclick=function(){
   xhr('/login',{
     sltoken: SecureLogin(), //returns state and opens the app
@@ -175,7 +175,7 @@ New users must type an email and **master password** to create a **Profile**. Se
 
 The keypair derivation is deterministic: running following code will generate the same **profile** on any machine:
 
-```
+```ruby
 derived_root = require("scrypt").hashSync("masterpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"user@email.com").toString("base64")
 ```
 
@@ -185,7 +185,7 @@ Opening `securelogin://#provider=https://my.app&state=STATE` and clicking "Login
 
 Which is handled by `/securelogin` path:
 
-```
+```ruby
 def securelogin
   state = params[:state].gsub(/[^a-z0-9]/,'')
   response = params[:response].to_s
@@ -196,7 +196,7 @@ end
 
 This code puts params[:response] into Redis key-value storage so the simultaneous `/login` request the user made few seconds ago can pick it up and proceed.
 
-```
+```ruby
 def self.await(state)
   sltoken = false
   state = state.gsub(/[^a-z0-9]/,'')
@@ -251,7 +251,7 @@ Make sure the signature is valid for given pubkey. If the user with given pubkey
 
 If all assertions are correct, you can log user in 
 
-```
+```ruby
 def login
   sltoken = SecureLogin.await(params[:sltoken])
   return html "Timeout, please try again" unless sltoken
