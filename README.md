@@ -272,7 +272,7 @@ def login
 end
 ```
 
-Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. If you're not using Ruby, please get in touch.
+Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. **Please get in touch** for any help with implementation.
 
 ### SDK, implementations and libraries
 
