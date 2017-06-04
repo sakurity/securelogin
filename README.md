@@ -272,9 +272,7 @@ def login
 end
 ```
 
-After clicking Login the client sends signed `sltoken` to `client` URL on your server. 
-
-Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>
+Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. If you're not using Ruby, please get in touch.
 
 ### SDK, implementations and libraries
 
@@ -419,7 +417,7 @@ electron-packager . "SecureLogin" --overwrite --arch=x64 --platform=win32
 
 4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
 
-5. In the future, V2 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
+5. In the future, 2.0 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
 
 6. Invest in more efficient derivation
 
