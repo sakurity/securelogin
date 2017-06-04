@@ -107,7 +107,7 @@ Please note, password manager are not in the table because there's no such thing
     <td class=g3>No per-site passwords</td>
     <td class=g3>Cryptographic key never leaves your device</td>
     <td class=g3>Excellent sign-up and login user experience. Works on all platforms with all browsers</td>
-    <td class=g3>V2 with Doublesign will protect from malware with scope-specific signature</td>
+    <td class=g3>2.0 with Doublesign will protect from malware with scope-specific signature</td>
     <td class=g3>Free and Open Source</td>
   </tr>
 </table>
@@ -133,9 +133,9 @@ After clicking Login the client sends signed `sltoken` to `client` URL on your s
 
 ### SDK, implementations and libraries
 
-<a href="https://securelogin.pw/sdk.js">JS SDK</a> - tiny JS helper. Please do not hot-link and use self-hosted code. 
+<a href="https://cobased.com/sdk.js">JS helper</a> that you should copy to your app. 
 
-<a href="https://github.com/homakov/cobased">Ruby on Rails implementation demo</a>
+<a href="https://github.com/homakov/cobased">Ruby on Rails implementation</a>
 
 
 ## FAQ
@@ -154,7 +154,7 @@ But more importantly, they do not solve the problem that all our accounts belong
 
 Yes, like in all password managers, there's no way to recover your private key without password or recovery key. 
 
-There's common misunderstanding that email is any different: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
+There's common **misunderstanding that email is any different**: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
 
 In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we removed unnecessary levels of "backups" and "recovery codes", our scheme boils down to one master password, not to master password **and** backup file/paper/SIM card/email account etc. 
 
@@ -186,11 +186,11 @@ Chrome, Firefox: seamless experience. In Full Screen mode it's possible to focus
 
 Safari: localStorage of /s proxy cannot detect users with native app (because of default privacy settings to drop 3rd party trackers). That's why we ask user to confirm(do you have app) everytime. Also no way to avoid 'Do you want to allow this page to open “SecureLogin.app”?' dialog every time. 
 
-TorBrowser: SecurityError: The operation is insecure.
+TorBrowser: `SecurityError: The operation is insecure` when trying to open `securelogin://`
 
 ### Windows 10
 
-Edge: does not support custom protocol handlers like `securelogin://`. At all. Use Web version.
+Edge: does not support custom protocol handlers like `securelogin://`. At all. They don't provide any roadmap. Use Web version.
 
 Chrome: working fine.
 

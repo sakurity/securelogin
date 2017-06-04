@@ -1,13 +1,22 @@
-
-
-.ios{
-  width: 100px;
-  height: 100px;
-  position: absolute;
-  top:-50px;
-  left:-50px;
-  background: radial-gradient(red 20%, #fff 50%);
+.ios {
+    border: 3px solid red;
+    -webkit-border-radius: 300px;
+    height: 100px;
+    width: 100px;
+    position: absolute;
+    left:-50px;
+    top:-50px;
+    -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite; 
+    opacity: 0.0
 }
+@-webkit-keyframes pulsate {
+    0% {-webkit-transform: scale(0.1, 0.1); opacity: 0.0;}
+    50% {opacity: 1.0;}
+    100% {-webkit-transform: scale(1.2, 1.2); opacity: 0.0;}
+}
+
+
 
 .copymessage{
   padding: 10px;
@@ -63,8 +72,9 @@
 */
 .store{
   max-width: 150px;
-      position: relative;
-    text-align: center;
+  min-width: 150px;
+  position: relative;
+  text-align: center;
 
 }
 
@@ -105,6 +115,7 @@ a, a:visited {
   .splash p {
     position: relative;
     text-align: center;
+    /*margin: 10px;*/
   }
 
 .splash .progress {
