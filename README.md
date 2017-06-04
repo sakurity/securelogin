@@ -115,28 +115,160 @@ Please note, password manager are not in the table because there's no such thing
 
 # How it works?
 
-The "Secure Login" button on your website/app opens native SecureLogin app: `securelogin://provider=https://my.app&state=STATE` with following parameters:
+First, let's include this tiny helper:
+
+```
+SecureLogin = function(scope){
+  function toQuery(obj){
+    return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
+  }
+  var opts = {
+    provider: location.origin,
+    callback: 'ping',
+    state: crypto.getRandomValues(new Uint8Array(32)).reduce(function(a,k){return a+''+(k%32).toString(32)},'')
+  }
+
+  if(SecureLogin.pubkey) opts.pubkey = SecureLogin.pubkey
+  if(scope) opts.scope = toQuery(scope)
+  var query = toQuery(opts)
+  if(localStorage.securelogin || confirm("Do you have SecureLogin app installed?")){
+    localStorage.securelogin = 1
+    location = 'securelogin://#'+query
+  }else{
+    window.open('https://securelogin.pw/#' + query)        
+  }
+  return opts.state
+}
+```
+
+The "Secure Login" button on your website/app opens native SecureLogin app: `securelogin://#provider=https://my.app&state=STATE` with following parameters:
 
 **`provider`** - required. Use origin of your app eg https://my.app
 
 **`state`** - required. Generate a random string. SecureLogin app will ping `https://my.app/securelogin?state=STATE&response=SLTOKEN` while your initial request is waiting for SLTOKEN.
 
-New users should type an email and **master password**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. The keypair derivation is deterministic: running following code will generate the same hash on any machine:
+At the same time it sends a request to your `/login` action:
+
+```
+loginaccount.onclick=function(){
+  xhr('/login',{
+    sltoken: SecureLogin(), //returns state
+    authenticity_token: csrf
+  }, function(d){
+    if(d == 'ok'){
+      // force focus, useful for Chrome in full screen
+      //if(document.visibilityState!='visible') alert("Logged in successfully.")
+      location.reload()
+    }else{
+      console.log(d)
+    }
+  })
+  return false;
+}
+```
+
+It the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. After downloading new users must type an email and **master password**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. 
+
+The keypair derivation is deterministic: running following code will generate the same **profile** on any machine:
 
 ```
 derived_root = require("scrypt").hashSync("masterpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"user@email.com").toString("base64")
 ```
 
-Existing users will get a screen with `provider` on top and a Login button.
+Opening `securelogin://#provider=https://my.app&state=STATE` and clicking "Login" will make the following request internally:
 
-After clicking Login the client sends signed `sltoken` to `client` URL on your server. Verification code looks like <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">this</a>
+`https://my.app/securelogin?state=STATE&act=ping&response=https%3A%2F%2Fmy.app%252Chttps%3A%2F%2Fmy.app%2Fsecurelogin%252C%252C1496586322%2C2YNnncbnq7won%2B13AzJJqeBRREA9CTjYq%2FDwuGQAGy8LaQGnuH6OE10oLxV4kgJJhflnqdu0qY8bBC08v969Cg%3D%3D%252C%2Fbf0P0dBdDcQlak07UZpR4YnzPc2qw40jCSz1NAuw%2Bs%3D%2Ckdbjcc08YBKWdCY56lQJIi92wcGOW%2BKcMvbSgHN6WbU%3D%252C1uP20QU%2BWYvFf1KAxn3Re0ZYd2pm5vLdQhgkXTCjl44%3D%2Chomakov%40gmail.com`
+
+Which is handled by `/securelogin` path:
+
+```
+def securelogin
+  state = params[:state].gsub(/[^a-z0-9]/,'')
+  response = params[:response].to_s
+  REDIS.setex("sl:#{state}", 100, response)
+  html "ok"
+end
+```
+
+This code puts params[:response] into Redis key-value storage so the simultaneous pullin `/login` request the user made few seconds ago can pick it up and proceed.
+
+Once picked up, `/login` action must do few more checks:
+
+```
+def self.csv(str)
+  str.to_s.split(',').map{|f| URI.decode(f) }
+end
+
+message, signatures, authkeys, email = csv(response)
+
+pubkey, secret = csv(authkeys)
+signature, hmac_signature = csv(signatures)
+
+RbNaCl::VerifyKey.new(Base64.decode64(pubkey)).verify(Base64.decode64(signature), message) rescue error = 'Invalid signature' 
+
+provider, client, scope, expire_at = csv(message)
+
+scope = Rack::Utils.parse_query(scope)
+
+error = "Invalid provider" unless %w{http://128.199.242.161:8020 http://c.dev https://cobased.com}.include? provider
+error = "Invalid client" unless %w{http://128.199.242.161:8020/securelogin http://c.dev/securelogin https://cobased.com/securelogin}.include? client
+error = "Expired token" unless expire_at.to_i > Time.now.to_i
+
+if opts[:change] == true
+  error = "Not mode=change token" unless scope["mode"] == 'change' && scope.size == 2
+else
+  error = "Invalid scope" unless scope == (opts[:scope] || {})
+end
+
+```
+
+You need unpack the comma-separated value to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
+
+Make sure the signature is valid for given pubkey. If the user with given pubkey does not exist, simply create a new account with given email. 
+
+If all assertions are correct, you can log user in 
+```
+def login
+  sltoken = SecureLogin.await(params[:sltoken])
+  return html "Timeout, please try again" unless sltoken
+
+  parsed = SecureLogin.parse(sltoken)
+
+  record = User.find_by(securelogin_pubkey: parsed[:securelogin_pubkey]) || User.create(parsed)
+
+  obj = SecureLogin.verify(sltoken, {
+    pubkey: record.securelogin_pubkey, 
+    secret: record.securelogin_secret
+  })
+
+  if obj[:error]
+    render plain: obj[:error]
+  else
+    session[:user_id] = record.id
+    html "ok"
+  end
+end
+```
+
+After clicking Login the client sends signed `sltoken` to `client` URL on your server. 
+
+Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>
 
 ### SDK, implementations and libraries
 
-<a href="https://cobased.com/sdk.js">JS helper</a> that you should copy to your app. 
-
 <a href="https://github.com/homakov/cobased">Ruby on Rails implementation</a>
 
+Help needed for implementations for:
+
+* Wordpress
+
+* Django
+
+* Soft transition from Devise and Omniauth
+
+* Node.js
+
+* any other CMS and platform
 
 ## FAQ
 
