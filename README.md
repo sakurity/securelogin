@@ -6,6 +6,8 @@
 
 SecureLogin is decentralized authentication protocol for websites and apps. Classic passwords/2FA are poorly designed, hard to backup and inconvenient to use. SecureLogin is all-in-one solution that creates a cryptographic private key from your email and master password to sign in everywhere and helps you to forget about passwords.
 
+<a href="https://medium.com/@homakov/securelogin-forget-about-passwords-c1bf7b47f698">Blog post on 1.0 release and our Principles.</a>
+
 Here are 5 major problems it solves:
 
 1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It is working for everyone, not only for the geeks.
