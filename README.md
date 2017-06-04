@@ -152,7 +152,7 @@ At the same time it sends a request to your `/login` action:
 ```
 loginaccount.onclick=function(){
   xhr('/login',{
-    sltoken: SecureLogin(), //returns state
+    sltoken: SecureLogin(), //returns state and opens the app
     authenticity_token: csrf
   }, function(d){
     if(d == 'ok'){
@@ -167,7 +167,9 @@ loginaccount.onclick=function(){
 }
 ```
 
-It the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. After downloading new users must type an email and **master password**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. 
+It the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. 
+
+New users must type an email and **master password** to create a **Profile**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. 
 
 The keypair derivation is deterministic: running following code will generate the same **profile** on any machine:
 
@@ -190,9 +192,24 @@ def securelogin
 end
 ```
 
-This code puts params[:response] into Redis key-value storage so the simultaneous pullin `/login` request the user made few seconds ago can pick it up and proceed.
+This code puts params[:response] into Redis key-value storage so the simultaneous `/login` request the user made few seconds ago can pick it up and proceed.
 
-Once picked up, `/login` action must do few more checks:
+```
+def self.await(state)
+  sltoken = false
+  state = state.gsub(/[^a-z0-9]/,'')
+  # user is given 20 seconds to approve the request
+  20.times{
+    sleep 1
+    sltoken = REDIS.get("sl:#{state}")
+    break if sltoken
+  }
+  
+  sltoken
+end
+```
+
+Once sltoken is received from internal ping, `/login` action must check its validity:
 
 ```
 def self.csv(str)
@@ -222,11 +239,16 @@ end
 
 ```
 
-You need unpack the comma-separated value to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
+It unpacks the comma-separated-values `sltoken` to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
+
+Format of `sltoken`:
+
+csv(csv(provider, client, scope, expire_at), csv(signature, hmac_signature), csv(pubkey, secret), email)
 
 Make sure the signature is valid for given pubkey. If the user with given pubkey does not exist, simply create a new account with given email. 
 
 If all assertions are correct, you can log user in 
+
 ```
 def login
   sltoken = SecureLogin.await(params[:sltoken])
