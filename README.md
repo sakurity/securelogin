@@ -390,8 +390,6 @@ Planned mitigations:
 
 3. postMessage event.origin check (only for the Web app)
 
-
-
 ## Cordova
 
 Cordova is used for iOS and Android platforms. It's not exactly a smooth platform, and there will be native clients in the future, but it does the job.
@@ -408,21 +406,32 @@ cordova plugin add cordova-plugin-customurlscheme --variable URL_SCHEME=securelo
 cordova plugin add cordova-plugin-splashscreen
 cordova plugin add cordova-plugin-whitelist
 cordova plugin add cordova-plugin-device
-
-cordova run ios
 ```
+
+Plugins are ready, so last step is replacing www with our codebase:
+
+```
+rm -rf www
+git clone git@github.com:sakurity/securelogin.git www
+```
+
+Now you can use `cordova run ios` / `cordova run android`
 
 ## Electron
 
 Electron is employed for macOS, Windows and Linux apps.
 
+<a href="https://github.com/sakurity/securelogin-electron">Use this repo as to setup.</a> Here are some useful commands for building packages for distribution.
+
+Outside of Mac App Store
+
 ```
 electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
-
-
 electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
+```
 
-
+For MAS
+```
 electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 
 electron-osx-flat SecureLogin-mas-x64/SecureLogin.app

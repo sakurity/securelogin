@@ -292,7 +292,6 @@ function messageDispatcher(message){
       return false
     }else{ 
       for(var i in Profiles){
-        debug += Benc(getProfile(i).shared_key.publicKey) +", ";
         if(Benc(getProfile(i).shared_key.publicKey) == m.pubkey){
           use_i = i;
           profilelist.disabled = true
@@ -376,7 +375,7 @@ function messageDispatcher(message){
     L = getProfile(profilelist.value);
 
     var diff = new Date() - load_date;
-    if(diff < 700) return false
+    if(diff < 700) return false //backclickjack mitigation
 
     if(m.scope == 'mode=change'){
       var new_pubkey = getProfile(changeprofilelist.value).shared_key.publicKey
