@@ -31,12 +31,12 @@ Please note, password manager are not in the table because there's no such thing
 
 <table border=1px>
   <tr>
-    <td>Auth Scheme</td>
-    <td>Reuse/3rd Party Leak</td>
-    <td>Central Authority</td>
-    <td>Register/Login/Recovery Usability</td>
-    <td>MitM / Malware stealing money</td>
-    <td>Cost</td>
+    <th>Auth Scheme</th>
+    <th>Reuse/3rd Party Leak</th>
+    <th>Central Authority</th>
+    <th>Register/Login/Recovery Usability</th>
+    <th>MitM / Malware stealing money</th>
+    <th>Cost</th>
   </tr>
 
   <tr>
