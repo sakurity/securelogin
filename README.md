@@ -421,7 +421,7 @@ Now you can use `cordova run ios` / `cordova run android`
 
 Electron is employed for macOS, Windows and Linux apps.
 
-<a href="https://github.com/sakurity/securelogin-electron">Use this repo as to setup.</a> Here are some useful commands for building packages for distribution.
+<a href="https://github.com/sakurity/securelogin-electron">Use this repository.</a> Here are some useful commands for building packages for distribution.
 
 Outside of Mac App Store
 
