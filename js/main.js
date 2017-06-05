@@ -291,8 +291,6 @@ function messageDispatcher(message){
       main()
       return false
     }else{ 
-      var debug =  "need "+m.pubkey+', got '
-
       for(var i in Profiles){
         debug += Benc(getProfile(i).shared_key.publicKey) +", ";
         if(Benc(getProfile(i).shared_key.publicKey) == m.pubkey){
@@ -303,7 +301,7 @@ function messageDispatcher(message){
       }
 
       if(!use_i){
-        alert("Profile required for this request cannot be found ("+debug+")")
+        alert("Profile required for this request cannot be found")
         main()
         return false;
       }
@@ -328,6 +326,8 @@ function messageDispatcher(message){
 
   if(errors.length > 0){
     alert(errors.join(' '));
+    // any error? go to main screen
+    main()
     return false;
   }
 

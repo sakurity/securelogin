@@ -122,7 +122,7 @@ First, let's include this tiny helper:
 ```javascript
 SecureLogin = function(scope){
   function toQuery(obj){
-    return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
+    return Object.keys(obj).reduce(function(a,k){a.push(encodeURIComponent(k)+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
   }
   var opts = {
     provider: location.origin,
@@ -274,6 +274,10 @@ def login
 end
 ```
 
+**Warning about Email verification**: the protocol does not confirm user email and does not intend to do so. In our vision an email provided is merely an address for mails, not a primary key / identifier like in the classic authentication scheme. I.e. two accounts can have equal email.
+
+We don't recommend to confirm / verify it at all and let user specify whatever they want **unless you are obligated by law to require explicit email confirmation**
+
 Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. **Please get in touch** for any help with implementation.
 
 ### SDK, implementations and libraries
@@ -330,6 +334,14 @@ It supports desktop and native apps as well. But due to the fact that custom pro
 
 Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds in as soon as possible.
 
+### 7. How do I change master password?
+
+Many people bashing deterministc approach say that it's a hassle to manually change password on every website, while in password+vault approach you just change encryption password and keep actual content of the vault the same. This is naive and not paranoid enough to think that sometime in the future your actual vault will leak, as it's stored on Dropbox-like service.
+
+Nevertheless, the change functionality is there: it's called Change SecureLogin which opens SL with scope=`mode=change`. In this mode SL client offers to change from current profile to another profile added to the app. After confirming the website must update pubkey to new one, and no one can log in with old SL profile in that account. 
+
+You would have to do it with every service, and it will be automated to some extent.
+
 ## Compatibility & known issues
 
 The core functionality of SecureLogin is based on opening the native app, getting signed `sltoken` and returning user focus back to the same page. It's not easy at all.
@@ -352,6 +364,7 @@ Chrome: working fine.
 ### Linux
 
 
+
 ### iOS
 
 Safari: same as in Desktop safari, `/s` proxy does not work because localStorage is blocked for iframes.
@@ -364,6 +377,18 @@ It's disallowed to simply close the app, so to go back to previous screen (Safar
 Chrome: seamless experience, but no way to minimize the app so need 2 seconds delay before going to previous screen
 
 
+
+### Anti-Phishing Concerns
+
+There's potential possibility of phishing attacks for `callback=ping` only: another hostile page may open `securelogin://state=THEIRSTATE` while you're navigating target website. You would not know which tab in your browser actually opened SL client, there's no way for JS to safely share its `location.origin` with the native app.
+
+Planned mitigations:
+
+1. IP binding for `sltoken` is recommended
+
+2. Alert if the app was fired up twice in a row
+
+3. postMessage event.origin check (only for the Web app)
 
 
 
