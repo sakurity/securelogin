@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <title>SecureLogin</title>
     <meta charset="utf-8">
@@ -10,25 +11,24 @@
     <meta property="og:description" content="Decentralized Password Replacement" />
     <meta property="og:image" content="./icon-60@2x.png" />
     <link rel="apple-touch-icon" href="./icon-60@2x.png">
-    
+
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-  
+
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
 
     <link rel="stylesheet" href="./css/layout.css">
-
   </head>
+
   <body>
     <div class="container">
+
+      <!-- Password Generation Screen -->
       <div class="generation screen splash h">
         <img class="logo" src="./icon-60@2x.png">
 
         <div class="step1 h">
-
           <p>SecureLogin uses your password to generate a cryptographic key to your digital identity. This process is slow - to make your password harder to guess. Please keep this page open, it may take up to 20 seconds.</p>
-
-
           <div id="fountainG">
             <div id="fountainG_1" class="fountainG"></div>
             <div id="fountainG_2" class="fountainG"></div>
@@ -43,39 +43,37 @@
 
         <div class="step2 h">
           <p>3rd parties cannot compromise your accounts anymore without your master password. You entirely own your identity: SecureLogin is authentication without a middle man.</p>
-
-          <p>Do you accept that <b>all accounts you used with SecureLogin will be lost if you forget your exact master password?</b></p>          
+          <p>Do you accept that <b>all accounts you used with SecureLogin will be lost if you forget your exact master password?</b></p>
           <a class="b accept-rules slbutton">Accept</a>
         </div>
 
         <div class="step3 h">
           <p>Here is a list of websites and apps that currently support SecureLogin. Ask admins of websites you like to add SecureLogin if you hate passwords just like we do.</p>
-
         </div>
-
       </div>
 
-
+      <!-- Authentication Screen -->
       <div class="app-auth-screen auth screen h">
-        <div class="app"><h2 class="app-name"></h2></div>
-        <p>
-          <div class="settings-control-group profiles h">
-            <label class="settings-control-label">Using profile:</label>
-            <select class="settings-control-input" id="profilelist"></select>      
-          </div>
-        </p>
+        <div class="app">
+          <h2 class="app-name"></h2>
+        </div>
+
+        <div class="settings-control-group profiles h">
+          <label class="settings-control-label">Using profile:</label>
+          <select class="settings-control-input" id="profilelist"></select>
+        </div>
 
         <div class="settings-control-group changeprofiles h">
           <center><img src="img/downarrow.png" width="50px"></center>
           <label class="settings-control-label">Change to profile:</label>
-          <select class="settings-control-input" id="changeprofilelist"></select>     
+          <select class="settings-control-input" id="changeprofilelist"></select>
         </div>
 
         <div class="auth-data h"></div>
         <button class="b approve green">Login</button>
       </div>
 
-
+      <!-- App List/Download Screen -->
       <div class="app-list-screen list screen h">
         <div class="splash add-margin">
           <img class="logo loaddev" src="./icon-60@2x.png">
@@ -91,35 +89,19 @@
             </a></p>
 
             <p><a class="native"  href="/apps/SecureLogin Setup 1.0.0.exe"><img src="img/windowsstore.png" class="store"></a></p>
-            <!--
-            <a class="h"  href="https://itunes.apple.com/us/app/securelogin/id1236532215?ls=1&mt=8"><img src="img/appstore.svg" class="store"></a><br>
-            <br>
-            <a class="h" href=""><img src="img/macappstore.svg" class="store"></a></p>
-            -->
-
-
-            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a>
-
+         
+            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a></p>
             <p><a class="b enableweb slbutton">Use Web client</a></p>
           </div>
-
 
           <div class="settings-control-group main-form h">
             <p>Legacy Password Generator</p>
             <p style="font-size:14px">Here you can generate a password for websites that <b>don't support SecureLogin yet</b> and still rely on insecure legacy passwords</p>
             <p><input type="text" class="settings-control-input managerprovider" placeholder="Website or app name e.g. 'twitter' "></p>
             <p><input type="text" class="settings-control-input managerpassword copyable" placeholder="Click to copy the generated password"></p>
-            <p class="h copymessage">Copied!</p>         
-
-
-
-
+            <p class="h copymessage">Copied!</p>
             <p><a href="https://sakurity.com/securelogin">Who supports SecureLogin now?</a></p>
             <p style="font-size:14px">Follow the link to see up-to-date list of websites and apps implementing SecureLogin Protocol. Ask admin of your favorite website to support it too, it's really easy!</p>
-
-            
-
-
             <label class="settings-control-label">Default profile:</label>
             <select class="settings-control-input" id="profilesmain"></select>
             <a class="b red slbutton logoutprofile">Log out of this profile</a>
@@ -127,13 +109,10 @@
 
           <div class="settings-control-group login-form">
             <p>Make sure you write down your master password and that you never used this password before.</p>
-            <p><input required=true type="text" id="login" class="settings-control-input" placeholder="Email"></p>
+            <p><input required=true type="email" id="login" class="settings-control-input" placeholder="Email"></p>
             <input required=true type="password" id="password" class="settings-control-input" placeholder="Master Password">
             <a class="b real-sign-in slbutton">Add SecureLogin profile</a>
           </div>
-
-
-
 
           <div class="settings-control-group dev h" style="font-size:14px">
             <p>Profiles dump</p>
@@ -153,18 +132,18 @@
             <p>NEM</p>
             <input id="xem" class="settings-control-input">
           </div>
-
-
-
         </div>
       </div>
+
     </div>
 
-
     <div class="ios h"></div>
+
     <img class="h" id="ping">
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/scrypt.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
   </body>
+
 </html>

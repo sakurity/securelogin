@@ -4,13 +4,13 @@
 
 <a href="https://cobased.com">Try the demo now?</a>
 
-SecureLogin is decentralized authentication protocol for websites and apps. Classic passwords/2FA are poorly designed, hard to backup and inconvenient to use. SecureLogin is all-in-one solution that creates a cryptographic private key from your email and master password to sign in everywhere and helps you to forget about passwords.
+SecureLogin is a decentralized authentication protocol for websites and apps. Classic passwords/2FA are poorly designed, hard to backup and inconvenient to use. SecureLogin is an all-in-one solution that creates a cryptographic private key from your email and master password to sign in everywhere and helps you to forget about passwords.
 
 <a href="https://medium.com/@homakov/securelogin-forget-about-passwords-c1bf7b47f698">Blog post on 1.0 release and our Principles.</a>
 
 Here are 5 major problems it solves:
 
-1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It is working for everyone, not only for the geeks.
+1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It should work for everyone, not only for geeks.
 
 2. __Usability__: existing onboarding process is a disaster for conversion: Email, confirm email, password, confirm password, wait you need one digit and one capital letter, think of a new password, sign up and go to email box to click "Confirm My Email" a 1000th time in your life. **With SecureLogin, it's just two clicks.**
 
@@ -18,7 +18,7 @@ Here are 5 major problems it solves:
 
 4. __Man-in-the-Middle__: interaction of the user computer and the server is often compromised in between: broken HTTPS, CloudFlare, malicious browser extensions, Man-in-the-Browser and XSS can be prevented when the user explicitly signs every critical transaction. 
 
-5. __Malware__: SecureLogin 2.0 with Doublesign stops malware trying to act on behalf of your account – usually to steal your money. Doublesign is like a "two man rule" - the server must verify two signatures of "scope" which includes every detail of the transaction e.g. SWIFT, amount, currency, account number or Bitcoin address. Entire transaction is signed on both devices (usually desktop + mobile) so compromise of one of them wouldn't be enough to empty your bank account (unlike how it is now).
+5. __Malware__: SecureLogin 2.0 with Doublesign stops malware trying to act on behalf of your account – usually to steal your money. Doublesign is like a "two man rule" - the server must verify two signatures of "scope" which includes every detail of the transaction e.g. SWIFT, amount, currency, account number or Bitcoin address. The entire transaction is signed on both devices (usually desktop + mobile) so compromise of one of them wouldn't be enough to empty your bank account (unlike how it is now).
 
 ### SecureLogin vs X
 
@@ -26,7 +26,7 @@ SecureLogin is not a new OAuth (<a href="http://sakurity.com/oauth">but there's 
 
 Let's list all popular auth methods and some esoteric ones to see how they deal with these 5 problems for normal users. 
 
-Please note, password manager are not in the table because there's no such thing as "password manager auth method" - a manager is merely not enforceable. However there is tiny 1% of password managers __users__.
+Please note, password managers are not in the table because there's no such thing as a "password manager auth method" - a manager is merely not enforceable. However there is tiny 1% of password managers __users__.
 
 
 <table border=1px>
@@ -143,7 +143,7 @@ SecureLogin = function(scope){
 }
 ```
 
-The "Secure Login" button on your website/app opens native SecureLogin app: `securelogin://#provider=https://my.app&state=STATE` with following parameters:
+The "Secure Login" button on your website/app opens the native SecureLogin app: `securelogin://#provider=https://my.app&state=STATE` with the following parameters:
 
 **`provider`** - required. Use origin of your app eg https://my.app
 
@@ -169,7 +169,7 @@ loginaccount.onclick=function(){
 }
 ```
 
-It the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. 
+If the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. 
 
 New users must type an email and **master password** to create a **Profile**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. 
 
@@ -211,7 +211,7 @@ def self.await(state)
 end
 ```
 
-Once sltoken is received from internal ping, `/login` action must check its validity:
+Once sltoken is received from internal ping, the `/login` action must check its validity:
 
 ```
 def self.csv(str)
@@ -241,7 +241,7 @@ end
 
 ```
 
-It unpacks the comma-separated-values `sltoken` to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
+It unpacks the comma-separated-values `sltoken` to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on a 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
 
 Format of `sltoken`:
 
@@ -249,7 +249,7 @@ csv(csv(provider, client, scope, expire_at), csv(signature, hmac_signature), csv
 
 Make sure the signature is valid for given pubkey. If the user with given pubkey does not exist, simply create a new account with given email. 
 
-If all assertions are correct, you can log user in 
+If all assertions are correct, you can log the user in 
 
 ```ruby
 def login
@@ -310,19 +310,19 @@ But more importantly, they do not solve the problem that all our accounts belong
 
 ### 2. Master password is single point of failure in this system
 
-Yes, like in all password managers, there's no way to recover your private key without password or recovery key. 
+Yes, like in all password managers, there's no way to recover your private key without a password or recovery key. 
 
-There's common **misunderstanding that email is any different**: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
+There's a common **misunderstanding that email is any different**: try to reset your Gmail password now (backup email doesn't count as it's just turtles all the way down).
 
 In the end of any authentication scheme there will be a password that you just cannot forget. In SecureLogin we removed unnecessary levels of "backups" and "recovery codes", our scheme boils down to one master password, not to master password **and** backup file/paper/SIM card/email account etc. 
 
-### 3. Web version is easier to use. Why install native apps?
+### 3. The web version is easier to use. Why install native apps?
 
-Although the web version exists, no one should use it for anything serious. Users must install native clients which don't depend on securelogin.pw web server and generate private key much faster than JavaScript.
+Although the web version exists, no one should use it for anything serious. Users should install native clients which don't depend on the securelogin.pw web server and generate private key much faster than JavaScript.
 
 ### 4. Is it open source? Will it be free in the future?
 
-The protocol and the client are completely open source. They are free now and they will remain free in the future. There is no monetization plan except the one where Sakurity gets more clients for saving the Internet from two-decades long problem.
+The protocol and the client are completely open source. They are free now and they will remain free in the future. There is no monetization plan except the one where Sakurity gets more clients for saving the Internet from a two-decades long problem.
 
 It is not even technically possible to start charging money for anything: the protocol works client side, no external servers, no API. It's not a promise, it's a fact.
 
@@ -332,19 +332,19 @@ It supports desktop and native apps as well. But due to the fact that custom pro
 
 ### 6. Can it be trusted? What if there's a backdoor?
 
-Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds in as soon as possible.
+Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit it in an hour. There are instructions to build it for all platforms, and we're doing our best to implement reproducable builds as soon as possible.
 
 ### 7. How do I change master password?
 
-Many people bashing deterministc approach say that it's a hassle to manually change password on every website, while in password+vault approach you just change encryption password and keep actual content of the vault the same. This is naive and not paranoid enough to think that sometime in the future your actual vault will leak, as it's stored on Dropbox-like service.
+Many people bashing deterministc approaches say that it's a hassle to manually change password on every website, while in password+vault approach you just change the encryption password and keep the actual content of the vault the same. This is naive and it's not paranoid enough to think that sometime in the future your actual vault will leak, as it's stored on a Dropbox-like service.
 
-Nevertheless, the change functionality is there: it's called Change SecureLogin which opens SL with scope=`mode=change`. In this mode SL client offers to change from current profile to another profile added to the app. After confirming the website must update pubkey to new one, and no one can log in with old SL profile in that account. 
+Nevertheless, the change functionality is there: it's called Change SecureLogin which opens SL with scope=`mode=change`. In this mode SL client offers to change from current profile to another profile added to the app. After confirming the website must update the pubkey to a new one, and no one can log in with the old SL profile in that account. 
 
 You would have to do it with every service, and it will be automated to some extent.
 
 ## Compatibility & known issues
 
-The core functionality of SecureLogin is based on opening the native app, getting signed `sltoken` and returning user focus back to the same page. It's not easy at all.
+The core functionality of SecureLogin is based on opening the native app, getting a signed `sltoken` and returning user focus back to the same page. It's not easy at all.
 
 ### macOS
 
@@ -356,7 +356,7 @@ TorBrowser: `SecurityError: The operation is insecure` when trying to open `secu
 
 ### Windows 10
 
-Edge: does not support custom protocol handlers like `securelogin://`. At all. They don't provide any roadmap. Use Web version.
+Edge: does not support custom protocol handlers like `securelogin://`. At all. They don't provide any roadmap. Use the Web version.
 
 Chrome: working fine.
 
@@ -367,9 +367,9 @@ Chrome: working fine.
 
 ### iOS
 
-Safari: same as in Desktop safari, `/s` proxy does not work because localStorage is blocked for iframes.
+Safari: same as in Desktop safari, the `/s` proxy does not work because localStorage is blocked for iframes.
 
-It's disallowed to simply close the app, so to go back to previous screen (Safari) user must press top left corner icon, which is really small and barely visible.
+It's disallowed to simply close the app, so to go back to previous screen (Safari) the user must press top left corner icon, which is really small and barely visible.
 
 
 ### Android
@@ -459,7 +459,7 @@ electron-packager . "SecureLogin" --overwrite --arch=x64 --platform=win32
 
 6. Invest in more efficient derivation
 
-Inconsistent derivation is an issue among all platforms, especially for mobile. In the future current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 ). Move to Argon2.
+Inconsistent derivation is an issue among all platforms, especially for mobile. In the future, the current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 ). Move to Argon2.
 
 7. Design and branding
 
@@ -477,7 +477,7 @@ Get https://reproducible-builds.org/ for all platforms
 
 11. Make sure people don't forget master passwords
 
-This is very important since target audience is "general public": we need to draw a line between Legacy Passwords they could forget and used entire life and Master Passwords that you need just one, but **cannot forget**. Hygiene is completely different.
+This is very important since the target audience is "general public": we need to draw a line between Legacy Passwords they could forget and used entire life and Master Passwords that you need just one, but **cannot forget**. Hygiene is completely different.
 
 Track usage and remind after 3, 10 and 30 successful signins to try to type master password again.
 
