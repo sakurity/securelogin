@@ -430,7 +430,7 @@ electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/e
 electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
 ```
 
-For MAS
+For MAC
 ```
 electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 
