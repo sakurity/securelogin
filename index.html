@@ -26,6 +26,7 @@
       <!-- Password Generation Screen -->
       <div class="generation screen splash h">
         <img class="logo" src="./icon-60@2x.png">
+
         <div class="step1 h">
           <p>SecureLogin uses your password to generate a cryptographic key to your digital identity. This process is slow - to make your password harder to guess. Please keep this page open, it may take up to 20 seconds.</p>
           <div id="fountainG">
@@ -39,11 +40,13 @@
             <div id="fountainG_8" class="fountainG"></div>
           </div>
         </div>
+
         <div class="step2 h">
           <p>3rd parties cannot compromise your accounts anymore without your master password. You entirely own your identity: SecureLogin is authentication without a middle man.</p>
           <p>Do you accept that <b>all accounts you used with SecureLogin will be lost if you forget your exact master password?</b></p>
           <a class="b accept-rules slbutton">Accept</a>
         </div>
+
         <div class="step3 h">
           <p>Here is a list of websites and apps that currently support SecureLogin. Ask admins of websites you like to add SecureLogin if you hate passwords just like we do.</p>
         </div>
@@ -54,17 +57,18 @@
         <div class="app">
           <h2 class="app-name"></h2>
         </div>
-        <p>
+
         <div class="settings-control-group profiles h">
           <label class="settings-control-label">Using profile:</label>
           <select class="settings-control-input" id="profilelist"></select>
         </div>
-        </p>
+
         <div class="settings-control-group changeprofiles h">
           <center><img src="img/downarrow.png" width="50px"></center>
           <label class="settings-control-label">Change to profile:</label>
           <select class="settings-control-input" id="changeprofilelist"></select>
         </div>
+
         <div class="auth-data h"></div>
         <button class="b approve green">Login</button>
       </div>
@@ -73,6 +77,7 @@
       <div class="app-list-screen list screen h">
         <div class="splash add-margin">
           <img class="logo loaddev" src="./icon-60@2x.png">
+
           <div class="in-web">
             <p>Forget about passwords with SecureLogin</p>
             <p>
@@ -98,6 +103,7 @@
             <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a>
             <p><a class="b enableweb slbutton">Use Web client</a></p>
           </div>
+
           <div class="settings-control-group main-form h">
             <p>Legacy Password Generator</p>
             <p style="font-size:14px">Here you can generate a password for websites that <b>don't support SecureLogin yet</b> and still rely on insecure legacy passwords</p>
@@ -110,12 +116,14 @@
             <select class="settings-control-input" id="profilesmain"></select>
             <a class="b red slbutton logoutprofile">Log out of this profile</a>
           </div>
+
           <div class="settings-control-group login-form">
             <p>Make sure you write down your master password and that you never used this password before.</p>
             <p><input required=true type="text" id="login" class="settings-control-input" placeholder="Email"></p>
             <input required=true type="password" id="password" class="settings-control-input" placeholder="Master Password">
             <a class="b real-sign-in slbutton">Add SecureLogin profile</a>
           </div>
+
           <div class="settings-control-group dev h" style="font-size:14px">
             <p>Profiles dump</p>
             <input id="secretkey" class="settings-control-input">
