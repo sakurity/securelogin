@@ -30,6 +30,17 @@ try{
     var hash = arg.substr(arg.indexOf('#')+1)
     messageDispatcher(fromQuery(hash));
   })
+  E.ipcRenderer.on('verifiedRequest', function(event, arg){
+    console.log(arg)
+    clearTimeout(window.delayed_launch)
+
+    var hash = arg.request.substr(arg.request.indexOf('?')+1)
+    hash = fromQuery(hash)
+
+    // force setting provider
+    hash.provider = arg.provider
+    messageDispatcher(hash);
+  })
 }catch(e){
   E = false
 
