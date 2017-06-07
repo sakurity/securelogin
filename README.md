@@ -117,6 +117,8 @@ Please note, password managers are not in the table because there's no such thin
 
 # How it works?
 
+![Flow](https://user-images.githubusercontent.com/174693/26845447-26c08c22-4aff-11e7-9a31-9ce8f74fcd37.png)
+
 First, let's include this tiny helper:
 
 ```javascript
@@ -446,7 +448,7 @@ Electron is employed for macOS, Windows and Linux apps.
 
 Outside of Mac App Store
 
-```wh
+```sh
 electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
 ```
