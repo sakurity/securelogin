@@ -173,22 +173,19 @@ At the same time it sends a request to your `/login` action:
 
 ```javascript
 loginAccount.addEventListener('click', function() {
-  xhr(
-    '/login',
-    {
+  xhr('/login', {
       sltoken: SecureLogin(), //returns state and opens the app
       authenticity_token: csrf
-    },
-    function(response) {
-      if (response === 'ok') {
-        // force focus, useful for Chrome in full screen
-        //if(document.visibilityState!='visible') alert("Logged in successfully.")
-        location.reload();
-      } else {
-        console.log(response);
-      }
+  }, function(response) {
+    if (response === 'ok') {
+      // force focus, useful for Chrome in full screen
+      //if(document.visibilityState!='visible') alert("Logged in successfully.")
+      location.reload();
+    } else {
+      console.log(response);
     }
-  );
+  });
+
   return false;
 });
 ```
@@ -454,7 +451,7 @@ electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/e
 electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
 ```
 
-For MAC
+For Mac App Store
 ```sh
 electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 
