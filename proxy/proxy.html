@@ -1,0 +1,31 @@
+<script>
+if(opener){
+  origin = location.hash.substr(1)
+  ws = new WebSocket('ws://127.0.0.1:3101')
+  ws.onopen = function(){
+    opener.postMessage("ping", origin);
+    //ws.send('ping')
+  }
+
+  ws.onmessage = function(m){
+    // don't use *, make sure opener is not hijacked
+    console.log('ws ',m)
+    opener.postMessage(m.data, origin)
+    console.log(m)
+  }
+
+  window.addEventListener('message',function(e){
+    if(e.origin != origin) return false;
+
+    if(e.data == 'close') window.close()
+    var trusted = {
+      origin: e.origin,
+      data: e.data
+    }
+
+    console.log(trusted)
+    ws.send(JSON.stringify(trusted))
+
+  })
+}
+</script>Connecting to SecureLogin...

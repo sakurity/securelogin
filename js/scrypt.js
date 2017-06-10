@@ -4,18 +4,25 @@
  * https://github.com/dchest/scrypt-async-js
  */
 
-//cordova?
+
+/*
+
+    unverified requests in cordova (deprecated)
+
 window.handleOpenURL = function(arg) {
   var hash = arg.substr(arg.indexOf('#')+1)
-
   if(localStorage.current_profile){
+
+    console.log(hash)
     clearTimeout(window.delayed_launch)
     messageDispatcher(fromQuery(hash));
+
   }else{
     location.hash = hash
   }
 }
 
+*/
 
 try{
   window.nodeRequire = require;
@@ -24,18 +31,22 @@ try{
   delete window.module;
 
   E = nodeRequire('electron')
+
+
+  /* deprecated open-url event
   E.ipcRenderer.on('dispatchRequest', function(event, arg){
     console.log(arg)
     clearTimeout(window.delayed_launch)
     var hash = arg.substr(arg.indexOf('#')+1)
     messageDispatcher(fromQuery(hash));
   })
+  */
+
   E.ipcRenderer.on('verifiedRequest', function(event, arg){
     console.log(arg)
     clearTimeout(window.delayed_launch)
 
-    var hash = arg.request.substr(arg.request.indexOf('?')+1)
-    hash = fromQuery(hash)
+    var hash = fromQuery(arg.request)
 
     // force setting provider
     hash.provider = arg.provider

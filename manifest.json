@@ -1,21 +1,23 @@
-{  
-  "lang": "en_US",
-  "name": "SecureLogin",  
-  "short_name": "SecureLogin",
-  "description": "Decentralized password replacement",
+{
+  "name": "SecureLogin",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "SecureLogin Extension",
+  "homepage_url": "https://securelogin.pw/",
+  "options_page": "index.html",
+  "icons": { "48": "logo-48.png",
+            "128": "logo-128.png" },
 
-  "icons": [{  
-    "src": "./img/192.png",  
-    "sizes": "192x192",
-    "type": "image/png"
-  }],
-  "display": "browser",
+  "permissions": [
 
-  "orientation": "portrait",
-  "start_url": "./index.html",
-  "author": {
-    "name": "Sakurity",
-    "website": "https://sakurity.com/securelogin"
-  },
-  "witnesses": {}
+  ],
+  "web_accessible_resources": [ "index.html" ],
+
+   "browser_action": {
+    "icons": ["logo-128.png"],
+    "default_title": "SecureLogin",
+    "default_popup": "index.html"  
+   },
+
+  "content_security_policy":"script-src 'self';object-src 'self'"
 }

@@ -86,7 +86,7 @@ function logout(){
 function redirect(uri){
   var test_uri = uri.replace(/[^a-zA-Z:]/g,'');
   if(test_uri.match(/^(javascript|data|mailto|securelogin):/) ){
-    alert(uri+" is invalid URI");
+    console.log(uri+" is invalid URI");
     return false;
   }else{
     l("Redirecting to "+uri);
@@ -99,6 +99,9 @@ function redirect(uri){
   }
 }
 
+function l(a){
+  console.log(a)
+}
 
 function secondsFromNow(seconds){
   return (Math.floor(new Date / 1000)) + seconds
@@ -171,6 +174,7 @@ toQuery=function(obj) {
 }
 
 fromQuery=function(str) {
+  if(typeof str != 'string' || str=='') return {}
   var o = {};
   str.split('&').map(function(pair){
     var pair = pair.split('=');
@@ -272,9 +276,9 @@ function messageDispatcher(message){
     m.client = m.provider + '/securelogin'
   }
 
-  if(m.callback!='ping'){
-    m.callback = 'direct'
-  }
+  //if(m.callback!='ping'){
+  m.callback = 'ws'
+  //}
 
   if(m.scope){
     if(m.scope.length > 10000){
@@ -401,8 +405,6 @@ function messageDispatcher(message){
       ])
     }
 
-    // keep using /s proxy if currently in web
-    if(inweb) response_obj.web = 1
 
     var callback = m.client + "?" + toQuery(response_obj)
     
@@ -450,8 +452,31 @@ function messageDispatcher(message){
       
       //make sure it hits ping endpoint, little timeout
     }else{
-      redirect(callback)
-      quit()
+      if(m.callback=='ws'){
+        if(inweb){
+          opener.postMessage(response_obj.response, m.provider)
+        }
+        if(E){
+          //ipc to main processor
+          E.ipcRenderer.send('response', response_obj.response)
+        }
+        if(window.cordova && m.conn){
+          wsserver.send(m.conn, response_obj.response)
+
+          if(window.device && window.device.platform == 'iOS'){
+            // on exit iOS returns to Home screen, not the app
+            hide('.container')
+            show('.ios')
+          }else{
+            quit()
+          }
+          
+        }
+
+      }else{
+        redirect(callback)
+        quit()        
+      }
     }
   }
 }
@@ -641,10 +666,10 @@ window.onload = (function(){
   }
 
 
-  window.inweb = location.origin.startsWith('http')
+  window.inweb = ['http:','https:','chrome-extension:'].indexOf(location.protocol) != -1
   window.Profiles = localStorage.current_profile ? JSON.parse(localStorage.profiles) : []
 
-  if(inweb){
+  if(inweb && location.protocol != 'chrome-extension:'){
     hide($('.login-form'))
     
     var hash = location.hash.substr(1);
@@ -658,17 +683,36 @@ window.onload = (function(){
     }
 
 
-
+    /*
+    //unverified request (deprecated)
+      
     if(hash.length > 5 && localStorage.current_profile){
-      // web app auth request
       messageDispatcher(fromQuery(hash));
       return false
     }
+    */
+
   }else{
     hide($('.in-web'));
-
   }
-  window.delayed_launch = setTimeout(main,800)
+
+  if(inweb && opener){
+    window.addEventListener('message', function(e){
+      var hash = fromQuery(e.data)
+      hash.provider = e.origin //force set provider
+      console.log(hash)
+      messageDispatcher(hash)
+    })
+
+    //notify the opener we are ready
+    opener.postMessage('ping','*')
+  }else{
+    main()
+  }
+
+
+  //window.delayed_launch = setTimeout(main,800)
+  main()
 
   // smoke test. Previously Samsung returned wrong Scrypt hashes.
   //if(window.plugins){
@@ -679,3 +723,72 @@ window.onload = (function(){
 
 })
 
+
+//cordova plugin add cordova-plugin-httpd
+
+
+document.addEventListener('deviceready',function(){ 
+  httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
+
+  httpd.getURL(function(url){
+    if(url.length > 0) {
+      console.log("running",url)
+    } else {
+        httpd.startServer({
+          'www_root' : 'proxy',
+          'port' : 3102,
+          'localhost_only' : true
+        }, function( url ){
+          console.log(url)
+        }, function( error ){
+          console.log(error)
+        });
+    }
+    
+  });
+
+
+  window.wsserver = window.cordova.plugins.wsserver
+  trusted_proxy = 'http://127.0.0.1:3102'
+  wsserver.start(3101, {
+    'onFailure' :  function(addr, port, reason) {
+      l("failure "+addr+ port+ reason);
+    },
+    'onOpen' : function(conn) {
+      // only local requests accepted
+
+    },
+    'onMessage' : function(conn, trusted) {
+      if(isLocalhost(conn.remoteAddr) && conn.httpFields.Origin){
+        var trusted = JSON.parse(trusted)
+        
+        //Trusted
+        if(conn.httpFields.Origin == trusted_proxy){
+          trusted.data.provider = msg.origin
+        }else{
+          trusted.data.provider = conn.httpFields.Origin
+        }
+        //pass over current conn
+        trusted.conn = conn
+
+        messageDispatcher(trusted.data)
+        return false
+      }
+    },
+    'onClose' : function(conn, code, reason) {
+      l('disconnected '+conn.remoteAddr);
+    },
+    'tcpNoDelay' : true    
+  }, function onStart(addr, port) {
+      //l("server "+addr+port);
+  }, function onDidNotStart(reason) {
+      alert("server failed "+reason);
+  });
+
+})
+
+
+
+function isLocalhost(ip){
+  return ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(ip) != -1 || ip.indexOf('::ffff:127.0.0.1:') == 0
+}
