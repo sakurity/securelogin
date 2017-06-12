@@ -5,24 +5,25 @@
  */
 
 
-/*
 
-    unverified requests in cordova (deprecated)
+
+//    unverified requests in cordova (deprecated)
 
 window.handleOpenURL = function(arg) {
+  clearTimeout(window.delayed_launch)
+  /*
   var hash = arg.substr(arg.indexOf('#')+1)
   if(localStorage.current_profile){
 
     console.log(hash)
-    clearTimeout(window.delayed_launch)
     messageDispatcher(fromQuery(hash));
 
   }else{
     location.hash = hash
   }
+  */
 }
 
-*/
 
 try{
   window.nodeRequire = require;
@@ -32,29 +33,14 @@ try{
 
   E = nodeRequire('electron')
 
-
-  /* deprecated open-url event
-  E.ipcRenderer.on('dispatchRequest', function(event, arg){
-    console.log(arg)
-    clearTimeout(window.delayed_launch)
-    var hash = arg.substr(arg.indexOf('#')+1)
-    messageDispatcher(fromQuery(hash));
-  })
-  */
-
   E.ipcRenderer.on('verifiedRequest', function(event, arg){
-    console.log(arg)
     clearTimeout(window.delayed_launch)
-
     var hash = fromQuery(arg.request)
-
-    // force setting provider
-    hash.provider = arg.provider
-    messageDispatcher(hash);
+    hash.client = arg.client
+    messageDispatcher(hash)
   })
 }catch(e){
   E = false
-
 }
 
 

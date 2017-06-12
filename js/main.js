@@ -5,25 +5,78 @@ scrypt_opts = [18, 6]
 // scrypt_opts = [20, 20]
 
 
-function main(){
-  if(Profiles.length > 0){
-    localStorage.profiles = JSON.stringify(Profiles)
+function save(){
+  localStorage.profiles = JSON.stringify(Profiles)
+}
 
-    var list = ''
-    for(var i in Profiles){
-      var o = Profiles[i]
-      var title = e(o.email) //+" ("+o.date.substr(0,10)+')'
-      list += '<option '+(Number(localStorage.current_profile) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
+function main(){
+  var await_for = 1000
+  if(Profiles.length > 0){
+    save()
+    listProfiles()
+
+
+    var visited = Profiles[Number(localStorage.current_profile)].visited
+    //$('.tolist>option[value="'+from+'"]')
+    if(visited){
+      $('.changefor').value = visited.join("\n")
     }
-    profilesmain.innerHTML = list
+
+
+
+    if(inweb){
+      if(opener){
+        window.addEventListener('message', function(e){
+          var msg = fromQuery(e.data)
+          msg.client = e.origin //force set provider
+          messageDispatcher(msg)
+        })
+
+        //notify the opener we are ready
+        opener.postMessage('ping','*')
+        await_for = 50
+      }else{
+        await_for = 0
+      }
+    }
+
+
+
     show($('.main-form'))
-    show($('.login-form'))
 
   }else{
     hide($('.main-form'))
   }
 
-  screen('list')
+  window.delayed_launch = setTimeout(function(){
+    screen('list')
+  },await_for)
+}
+
+
+
+function listProfiles(use_i){
+  if(typeof use_i == 'undefined'){
+    use_i = localStorage.current_profile
+  }
+
+  var list = ''
+  var used_titles = []
+  for(var i in Profiles){
+    var o = Profiles[i]
+    var title = e(o.email) //
+    if(used_titles.indexOf(title) != -1){
+      title += " ("+o.date.substr(0,10)+')'
+    }else{
+      used_titles.push(title);
+    }
+
+    list += '<option '+(Number(use_i) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
+  }
+  // all dropdowns have up-to-date list
+  document.querySelectorAll('.profilelist').forEach(function(elem){
+    elem.innerHTML = list
+  })
 }
 
 
@@ -38,35 +91,6 @@ function getProfile(n){
   return profile
 }
 
-function listProfiles(selected){
-  if(!selected){
-    selected = localStorage.current_profile
-  }
-  var list = ''
-  for(var i in Profiles){
-    var o = Profiles[i]
-
-    // do we allow two profiles with equal Email? How to make them differ?
-    var title = e(o.email) //+", added on "+o.date.substr(0,10) )
-
-    list += '<option '+(Number(selected) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
-  }
-  show($('.profiles'))
-  profilelist.innerHTML = list
-}
-
-function changeProfiles(except){
-  var list = ''
-  for(var i in Profiles){
-    var o = Profiles[i]
-    var title = e(o.email)
-
-    if(Number(except) != i)
-    list += '<option value="'+i+'">'+title+'</option>'
-  }
-  show($('.changeprofiles'))
-  changeprofilelist.innerHTML = list
-}
 
 function logout(){
   if(confirm("You will not lose any data, but you will have to enter same email & password to log in this profile again")){
@@ -173,6 +197,8 @@ toQuery=function(obj) {
   return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
 }
 
+var whitelist = 'provider client scope expire_at confirmed callback state'.split(' ')
+
 fromQuery=function(str) {
   if(typeof str != 'string' || str=='') return {}
   var o = {};
@@ -235,59 +261,27 @@ function format(origin){
 
 // where everything happens
 function messageDispatcher(message){
-  // back to "baseline", if the app was left in another state
+  clearTimeout(window.delayed_launch)
 
+  // few hacks to return UI back to "baseline", if the app was left in another state
   hide('.ios')
   show('.container')
-
-
+  delete($('.approve').style['background-color'])
 
   m = message // store in global variable
-
-  var errors = [];
-  var web = /^https?:\/\/[a-z0-9-\.]+(:[0-9]{1,5})?$/
-  var web_url = /^https?:\/\/[a-z0-9-\.]+(:[0-9]{1,5})?/
-  if(m.provider){
-    if(!m.provider.match(web)){
-      errors.push('provider is not a website');
-    }
-    if(m.provider.length > 1000){
-      errors.push('provider is longer than 1000');
-    }
-    $('.app-name').innerText = format(m.provider)
-
+  var web_url = /^https?:\/\/[a-z0-9-\.]+(:[0-9]{1,5})?$/
+  if( m.provider && m.provider != m.client && m.provider.match(web_url)){
+    sl_connect = true
+    $('.app').innerHTML = '<h2 class="app-name">'+e(format(m.client))+'</h2><p style="text-align:center">would like access to your account on</p><h2 class="app-name">'+e(format(m.provider))+"</p>"
   }else{
-    errors.push('provider is required. ')
+    // by default the client asks sltoken for itself
+    sl_connect = false
+    m.provider = m.client
+    $('.app-name').innerText = format(m.client)
   }
 
-  third_party = false
-  if(m.client){
-    if(m.client.match(web_url) && m.client.length < 1000){
-
-      if(format(m.client) != format(m.provider)){
-        third_party = true
-        //$('.app-name').innerHTML = e(format(m.client))+"<p>would like access to</p>"+e(format(m.provider))
-        $('.app').innerHTML = '<h2 class="app-name">'+e(format(m.client))+'</h2><p style="text-align:center">would like access to</p><h2 class="app-name">'+e(format(m.provider))+"</p>"
-      }
-    }else{
-      errors.push('Invalid client. ')
-    }
-  }else{
-    m.client = m.provider + '/securelogin'
-  }
-
-  //if(m.callback!='ping'){
-  m.callback = 'ws'
-  //}
-
-  if(m.scope){
-    if(m.scope.length > 10000){
-      errors.push("scope to sign is longer than 10000.")
-    }
-  }else{
-    m.scope = ''
-  }
-
+  if(!m.scope) m.scope = ''
+  
   var use_i = false
   if(m.pubkey){
     if(Profiles.length == 0){
@@ -298,7 +292,7 @@ function messageDispatcher(message){
       for(var i in Profiles){
         if(Benc(getProfile(i).shared_key.publicKey) == m.pubkey){
           use_i = i;
-          profilelist.disabled = true
+          $('.currentlist').disabled = true
           break;
         }
       }
@@ -315,7 +309,8 @@ function messageDispatcher(message){
   }
 
   if(Profiles.length == 0){
-    errors.push("You don't have SecureLogin profiles")
+    main();
+    return false;
   }
 
   /*
@@ -326,13 +321,6 @@ function messageDispatcher(message){
   */
 
   listProfiles(use_i);
-
-  if(errors.length > 0){
-    alert(errors.join(' '));
-    // any error? go to main screen
-    main()
-    return false;
-  }
 
 
 
@@ -345,23 +333,18 @@ function messageDispatcher(message){
     case '': 
       label = 'Sign In'
       break
-    case 'mode=change': 
-      label = 'Change SecureLogin'
-      if(Profiles.length == 1){
-        alert("You only have one profile, if you want to change it you need to add another SecureLogin profile");
-        location.reload()
-        return false;
-
-      }else{
-        changeProfiles(use_i) 
-      }
-      break
     case 'mode=delete': 
       label = 'Delete This Account'
       $('.approve').style['background-color'] = 'red'    
       break
     default:
       var req = fromQuery(m.scope)
+      if(req.mode == 'change'){
+        // we don't want apps signing mode=change manually, users must use profile change page
+        alert('mode=change is not allowed')
+        return false;
+      }
+
       var str = ''
       for(var k in req){
         str+='<div class="settings-control-group"><label class="settings-control-label">'+e(k)+'</label>'+e(req[k])+'</div>'
@@ -369,117 +352,69 @@ function messageDispatcher(message){
       data.innerHTML = str;
       show(data)
 
-      label = third_party ? 'Grant Access' : 'Approve'
+      label = sl_connect ? 'Grant Access' : 'Approve'
     
   }
   
   $(".approve").innerText = label
 
-  $(".approve").onclick = function(){
-    L = getProfile(profilelist.value);
+  //We try to stop backclickjack for sensitive actions
+  btn = $('.approve')
+  if(m.scope != ''){
+    hide(btn)
+    setTimeout(function(){
+      show(btn)
+    }, 800)
+  }
 
-    var diff = new Date() - load_date;
-    if(diff < 700) return false //backclickjack mitigation
+  btn.onclick = function(){
+    var val = Number($('.currentlist').value)
+    L = getProfile(val);
+    console.log(val)
 
-    if(m.scope == 'mode=change'){
-      var new_pubkey = getProfile(changeprofilelist.value).shared_key.publicKey
-      m.scope = "mode=change&to="+encodeURIComponent(Benc(new_pubkey))
+
+    if(!Profiles[val].visited){
+      Profiles[val].visited = []
     }
-
-    var expire_at = secondsFromNow(60)
-    var token = csv([m.provider, m.client, m.scope, expire_at])
-
-    // 1) could be helpful if public key fails (post quantum crypto)
-    // 2) useful for legacy passwords generator
-    // 3) provider can authenticate strings like deposit address with HMAC
-    var shared_secret = hmac( L.shared_base , m.provider)
-
-    var response_obj = {
-      state: m.state,
-      act: m.callback,
-      response: csv([
-        token,
-        csv([sign(token, Benc(L.shared_key.secretKey)), hmac(shared_secret, token)]),
-        csv([Benc(L.shared_key.publicKey), third_party ? '' : shared_secret]),
-        L.email
-      ])
-    }
-
-
-    var callback = m.client + "?" + toQuery(response_obj)
     
-    if(m.callback=='ping'){
-      //alert('pinging '+callback);
+    // add once
+    if(Profiles[val].visited.indexOf(m.provider) == -1){
+      Profiles[val].visited.push(m.provider)
+      save();
+    }
+
+    var sltoken = approve(L, csv([m.provider, m.client, m.scope, secondsFromNow(60)]))
+
+    if(inweb){
+      opener.postMessage(sltoken, m.provider)
+    }else if(E){
+      //ipc to main processor
+      E.ipcRenderer.send('response', sltoken)
+    } else if(window.cordova && m.conn){
+      wsserver.send(m.conn, sltoken)
       if(window.device && window.device.platform == 'iOS'){
         // on exit iOS returns to Home screen, not the app
         hide('.container')
         show('.ios')
-      }
-      if(E){
-        E.remote.getCurrentWindow().hide()
-      }
-
-      called = function(){
-        if(window.device && window.device.platform == 'iOS'){
-        }else{
-          quit()
-        }
-      }
-
-      window.downTimeout = setTimeout(function(){
-        alert("Cannot reach "+m.provider);
-        //redirect(callback)
-        called()
-      },10000)
-      //ping.src = callback
-      //document.write('^ Press to go back')
-      
-      var xhr = new XMLHttpRequest()
-      xhr.open('GET', callback)
-      xhr.onreadystatechange = function(){
-        console.log(xhr.readyState)
-        if(xhr.readyState > 1){
-          clearTimeout(window.downTimeout)
-          called()  
-        }
-      }
-      xhr.send()
-      
-      //navigator.sendBeacon(callback,'asdf')
-      //quit()
-
-
-      
-      //make sure it hits ping endpoint, little timeout
-    }else{
-      if(m.callback=='ws'){
-        if(inweb){
-          opener.postMessage(response_obj.response, m.provider)
-        }
-        if(E){
-          //ipc to main processor
-          E.ipcRenderer.send('response', response_obj.response)
-        }
-        if(window.cordova && m.conn){
-          wsserver.send(m.conn, response_obj.response)
-
-          if(window.device && window.device.platform == 'iOS'){
-            // on exit iOS returns to Home screen, not the app
-            hide('.container')
-            show('.ios')
-          }else{
-            quit()
-          }
-          
-        }
-
       }else{
-        redirect(callback)
-        quit()        
+        quit
       }
     }
   }
 }
+
+
+function approve(profile, to_sign, hide_email){
+  var shared_secret = hmac( L.shared_base , "secret:"+m.provider)
+
+  return csv([
+      to_sign,
+      csv([sign(to_sign, Benc(L.shared_key.secretKey)), hmac(shared_secret, to_sign)]),
+      csv([Benc(L.shared_key.publicKey), sl_connect ? '' : shared_secret]), // we don't leak shared_secret to Connect requests
+      hide_email ? '' : L.email
+    ])
+}
+
 
 
 function quit(){
@@ -534,12 +469,10 @@ function hexToBase64(hexstring) {
 
 
 
-// prevent backclickjack
-load_date = new Date()
 
 window.onload = (function(){
   // event listeners
-  profilesmain.onchange = function(){
+  $('.defaultlist').onchange = function(){
     localStorage.current_profile=this.value;
     main()
   }
@@ -587,7 +520,11 @@ window.onload = (function(){
       errors += 'Password must be at least 8 characters. '
     }
 
-    Profiles.map(function(e){ if(e.email == email){ 
+    Profiles.map(function(e){ if(e.email == email){
+      // we technically can have many profiles with equal email
+      // but does average user need such compartmentation?
+      // to prevent "email [2]" labels
+
       errors += "You already used this email for another profile. "}  
     })
 
@@ -607,14 +544,19 @@ window.onload = (function(){
     setTimeout(function(){ //need delay to show animation
       derive(password, email, function(root){
         // send stats about current device and derivation benchmark
+
+
         new_profile = {
           email: email,
           root: root,
           date: new Date().toJSON(),
           benchmark: new Date-start_derive,
           scrypt_opts: scrypt_opts.join(','),
-          confirmed: false
+          visited: []
         }
+
+        // don't store too much, it's only for Doublecheck
+        new_profile.checksum = Benc( nacl.hash( Udec(password+','+email) )).substr(0,3)
 
         hide($('.step1'))
         show($('.step2'))
@@ -622,10 +564,6 @@ window.onload = (function(){
         $('.accept-rules').onclick = function(){
           localStorage.current_profile = Profiles.push(new_profile) - 1;
           main()
-
-          //if(Profiles.length == 1 && !inweb){
-          //  redirect('https://securelogin.pw');
-          //}
         }
         if(Profiles.length > 0){
           // already accepted
@@ -633,7 +571,7 @@ window.onload = (function(){
         }
 
       })
-    },300)
+    },50)
   }
 
   password.onkeypress=function(e) {
@@ -654,27 +592,40 @@ window.onload = (function(){
   }
 
 
+
+
+  $('.changeprofile').onclick = function(){
+    screen('change')
+  }
+
+  $('.changeconfirm').onclick = function(){
+    var newpw = $('.newpw').value
+
+    if(confirm("You won't be able to use profile created with old password anymore. Are you sure?")){
+      //...
+
+    }
+  }
+
+
   $('.logoutprofile').onclick = logout
 
+  /*
   $('.enableweb').onclick = function(){
     // this popup is considered annoying?
     //if(confirm("SecureLogin Web client is much slower and less secure, try to install native app instead. Are you sure?")){
       show($('.login-form'))
       delete(localStorage.client)
-      localStorage.web = 1
     //}
-  }
+  }*/
 
 
   window.inweb = ['http:','https:','chrome-extension:'].indexOf(location.protocol) != -1
   window.Profiles = localStorage.current_profile ? JSON.parse(localStorage.profiles) : []
 
   if(inweb && location.protocol != 'chrome-extension:'){
-    hide($('.login-form'))
     
-    var hash = location.hash.substr(1);
-    
-    if(hash=='native'){
+    if(location.hash=='#native'){
       // proxy to native app
       screen('generation')
       hide($('.step1'))
@@ -683,35 +634,10 @@ window.onload = (function(){
     }
 
 
-    /*
-    //unverified request (deprecated)
-      
-    if(hash.length > 5 && localStorage.current_profile){
-      messageDispatcher(fromQuery(hash));
-      return false
-    }
-    */
-
   }else{
     hide($('.in-web'));
   }
 
-  if(inweb && opener){
-    window.addEventListener('message', function(e){
-      var hash = fromQuery(e.data)
-      hash.provider = e.origin //force set provider
-      console.log(hash)
-      messageDispatcher(hash)
-    })
-
-    //notify the opener we are ready
-    opener.postMessage('ping','*')
-  }else{
-    main()
-  }
-
-
-  //window.delayed_launch = setTimeout(main,800)
   main()
 
   // smoke test. Previously Samsung returned wrong Scrypt hashes.
@@ -722,10 +648,6 @@ window.onload = (function(){
     
 
 })
-
-
-//cordova plugin add cordova-plugin-httpd
-
 
 document.addEventListener('deviceready',function(){ 
   httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
@@ -759,19 +681,21 @@ document.addEventListener('deviceready',function(){
 
     },
     'onMessage' : function(conn, trusted) {
+      console.log("message ",trusted)
       if(isLocalhost(conn.remoteAddr) && conn.httpFields.Origin){
-        var trusted = JSON.parse(trusted)
+        var trusted_json = JSON.parse(trusted)
+        var trusted_msg = fromQuery(trusted_json.data)
         
         //Trusted
         if(conn.httpFields.Origin == trusted_proxy){
-          trusted.data.provider = msg.origin
+          trusted_msg.client = trusted_json.origin
         }else{
-          trusted.data.provider = conn.httpFields.Origin
+          trusted_msg.client = conn.httpFields.Origin
         }
         //pass over current conn
-        trusted.conn = conn
+        trusted_msg.conn = conn
 
-        messageDispatcher(trusted.data)
+        messageDispatcher(trusted_msg)
         return false
       }
     },
