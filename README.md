@@ -122,27 +122,47 @@ Please note, password managers are not in the table because there's no such thin
 First, let's include this tiny helper:
 
 ```javascript
-SecureLogin = function(scope){
-  function toQuery(obj){
-    return Object.keys(obj).reduce(function(a,k){a.push(encodeURIComponent(k)+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
+var SecureLogin = function(scope) {
+  function toQuery(obj) {
+    return Object.keys(obj)
+      .reduce(function(a, k) {
+        a.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
+        return a;
+      }, [])
+      .join('&');
   }
+
   var opts = {
     provider: location.origin,
     callback: 'ping',
-    state: crypto.getRandomValues(new Uint8Array(32)).reduce(function(a,k){return a+''+(k%32).toString(32)},'')
+    state: crypto.getRandomValues(new Uint8Array(32)).reduce(function(a, k) {
+      return a + '' + (k % 32).toString(32);
+    }, '')
+  };
+
+  if (SecureLogin.pubkey) {
+    opts.pubkey = SecureLogin.pubkey;
   }
 
-  if(SecureLogin.pubkey) opts.pubkey = SecureLogin.pubkey
-  if(scope) opts.scope = toQuery(scope)
-  var query = toQuery(opts)
-  if(localStorage.securelogin || confirm("Do you have SecureLogin app installed?")){
-    localStorage.securelogin = 1
-    location = 'securelogin://#'+query
-  }else{
-    window.open('https://securelogin.pw/#' + query)        
+  if (scope) {
+    opts.scope = toQuery(scope);
   }
-  return opts.state
-}
+
+  var query = toQuery(opts);
+
+  if (
+    localStorage.securelogin ||
+    confirm('Do you have SecureLogin app installed?')
+  ) {
+    localStorage.securelogin = 1;
+    location = 'securelogin://#' + query;
+  } else {
+    window.open('https://securelogin.pw/#' + query);
+  }
+
+  return opts.state;
+};
+
 ```
 
 The "Secure Login" button on your website/app opens the native SecureLogin app: `securelogin://#provider=https://my.app&state=STATE` with the following parameters:
@@ -154,21 +174,22 @@ The "Secure Login" button on your website/app opens the native SecureLogin app: 
 At the same time it sends a request to your `/login` action:
 
 ```javascript
-loginaccount.onclick=function(){
-  xhr('/login',{
-    sltoken: SecureLogin(), //returns state and opens the app
-    authenticity_token: csrf
-  }, function(d){
-    if(d == 'ok'){
+loginAccount.addEventListener('click', function() {
+  xhr('/login', {
+      sltoken: SecureLogin(), //returns state and opens the app
+      authenticity_token: csrf
+  }, function(response) {
+    if (response === 'ok') {
       // force focus, useful for Chrome in full screen
       //if(document.visibilityState!='visible') alert("Logged in successfully.")
-      location.reload()
-    }else{
-      console.log(d)
+      location.reload();
+    } else {
+      console.log(response);
     }
-  })
+  });
+
   return false;
-}
+});
 ```
 
 If the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. 
@@ -215,7 +236,7 @@ end
 
 Once sltoken is received from internal ping, the `/login` action must check its validity:
 
-```
+```ruby
 def self.csv(str)
   str.to_s.split(',').map{|f| URI.decode(f) }
 end
@@ -396,7 +417,7 @@ Planned mitigations:
 
 Cordova is used for iOS and Android platforms. It's not exactly a smooth platform, and there will be native clients in the future, but it does the job.
 
-```
+```sh
 cordova create sl SecureLogin
 cd sl
 
@@ -412,7 +433,7 @@ cordova plugin add cordova-plugin-device
 
 Plugins are ready, so last step is replacing www with our codebase:
 
-```
+```sh
 rm -rf www
 git clone git@github.com:sakurity/securelogin.git www
 ```
@@ -427,21 +448,20 @@ Electron is employed for macOS, Windows and Linux apps.
 
 Outside of Mac App Store
 
-```
+```sh
 electron-packager . "SecureLogin" --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 electron-installer-dmg SecureLogin-darwin-x64/SecureLogin.app SecureLogin
 ```
 
 For Mac App Store
-```
+```sh
 electron-packager . "SecureLogin" --platform=mas --osx-sign --overwrite --arch=x64 --icon=www/electron.icns
 
 electron-osx-flat SecureLogin-mas-x64/SecureLogin.app
 ```
 
 For Windows
-
-```
+```sh
 electron-packager . "SecureLogin" --overwrite --arch=x64 --platform=win32
 ```
 
