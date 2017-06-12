@@ -271,11 +271,9 @@ function messageDispatcher(message){
   m = message // store in global variable
   var web_url = /^https?:\/\/[a-z0-9-\.]+(:[0-9]{1,5})?$/
   if( m.provider && m.provider != m.client && m.provider.match(web_url)){
-    sl_connect = true
     $('.app').innerHTML = '<h2 class="app-name">'+e(format(m.client))+'</h2><p style="text-align:center">would like access to your account on</p><h2 class="app-name">'+e(format(m.provider))+"</p>"
   }else{
     // by default the client asks sltoken for itself
-    sl_connect = false
     m.provider = m.client
     $('.app-name').innerText = format(m.client)
   }
@@ -352,7 +350,7 @@ function messageDispatcher(message){
       data.innerHTML = str;
       show(data)
 
-      label = sl_connect ? 'Grant Access' : 'Approve'
+      label = (m.provider == m.client) ? 'Approve' : 'Grant Access'
     
   }
   
@@ -383,7 +381,7 @@ function messageDispatcher(message){
       save();
     }
 
-    var sltoken = approve(L, csv([m.provider, m.client, m.scope, secondsFromNow(60)]))
+    var sltoken = approve(L, m.provider, m.client, m.scope)
 
     if(inweb){
       opener.postMessage(sltoken, m.provider)
@@ -404,14 +402,14 @@ function messageDispatcher(message){
 }
 
 
-function approve(profile, to_sign, hide_email){
-  var shared_secret = hmac( L.shared_base , "secret:"+m.provider)
-
+function approve(profile, provider, client, scope){
+  var shared_secret = hmac( profile.shared_base , "secret:"+provider)
+  var to_sign = csv([provider, client, scope, secondsFromNow(60)])
   return csv([
       to_sign,
-      csv([sign(to_sign, Benc(L.shared_key.secretKey)), hmac(shared_secret, to_sign)]),
-      csv([Benc(L.shared_key.publicKey), sl_connect ? '' : shared_secret]), // we don't leak shared_secret to Connect requests
-      hide_email ? '' : L.email
+      csv([sign(to_sign, Benc(profile.shared_key.secretKey)), hmac(shared_secret, to_sign)]),
+      csv([Benc(profile.shared_key.publicKey), (provider == client) ? shared_secret : '']), // we don't leak shared_secret to Connect requests
+      profile.email
     ])
 }
 
@@ -540,8 +538,8 @@ window.onload = (function(){
     show('.step1')
     hide('.step2')
 
-    var start_derive = new Date
-    setTimeout(function(){ //need delay to show animation
+    setTimeout(function(){ 
+      var start_derive = new Date
       derive(password, email, function(root){
         // send stats about current device and derivation benchmark
 
@@ -584,10 +582,10 @@ window.onload = (function(){
   var native = document.querySelectorAll('.native')
   for (var i = 0; i < native.length; i++) {
     native[i].addEventListener('click', function(event) {
-      //if(confirm("SecureLogin button will open native app for this browser. Are you sure you installed our Desktop or Mobile app already?")){
+
       localStorage.client = 'securelogin://'
       console.log('enabled')
-      //}
+
     });
   }
 
@@ -600,9 +598,63 @@ window.onload = (function(){
 
   $('.changeconfirm').onclick = function(){
     var newpw = $('.newpw').value
+    var providers = $('.changefor').value.split("\n")
 
     if(confirm("You won't be able to use profile created with old password anymore. Are you sure?")){
-      //...
+      var n=Number(localStorage.current_profile)
+      var old_profile = getProfile(n)
+      var new_profile = Object.assign({}, Profiles[n])
+
+      changestatus.innerHTML += '<tr><td>Please wait, generating new key...</td><td></td></tr>'
+
+      derive(newpw, old_profile.email, function(root){
+        new_profile.root = root // updated root
+        new_profile.shared_base = hmac(new_profile.root, 'shared');
+        new_profile.shared_key = nacl.sign.keyPair.fromSeed( Bdec(new_profile.shared_base) )
+
+        for(var i =0;i<providers.length;i++){
+          var p = providers[i]
+          if(p.indexOf('http')!=0){
+            p = 'https://'+p
+          }
+
+          var new_sltoken = approve(new_profile, p, p, '')
+          var change_sltoken = approve(old_profile, p, p, toQuery({mode: 'change', to: new_sltoken}))
+
+          var xhr = new XMLHttpRequest()
+
+          //sync for now to not make a lot of requests at once
+          xhr.open('GET', p+'/securelogin?sltoken='+encodeURIComponent(change_sltoken), true)
+          xhr.onreadystatechange=function(){
+            if(xhr.readyState == 4){
+              
+              console.log(xhr.response)
+              status = ({
+                changed: "Changed",
+                not_found: "User is not found",
+                invalid_request: "Invalid request",
+                invalid_token: "Invalid token",
+                pubkey_exist: "This user already exists"
+              })[xhr.response]
+
+              changestatus.innerHTML += '<tr><td>'+e(format(p))+'</td><td>'+e(status)+'</td></tr>'
+
+            }
+          }
+          xhr.send()
+
+ 
+        }
+
+        // TODO: need to make sure if some provider is down, profile is not changed
+        // backup old key?
+
+        Profiles[n].root = new_profile.root;
+        save()
+
+
+
+      })      
 
     }
   }
