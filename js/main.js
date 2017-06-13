@@ -10,14 +10,13 @@ function save(){
 }
 
 function main(){
-  var await_for = 1000
+  var await_for = 500
   if(Profiles.length > 0){
     save()
     listProfiles()
 
 
     var visited = Profiles[Number(localStorage.current_profile)].visited
-    //$('.tolist>option[value="'+from+'"]')
     if(visited){
       $('.changefor').value = visited.join("\n")
     }
@@ -375,10 +374,23 @@ function messageDispatcher(message){
       Profiles[val].visited = []
     }
     
-    // add once
+    // add once, and doublecheck pw
     if(Profiles[val].visited.indexOf(m.provider) == -1){
       Profiles[val].visited.push(m.provider)
-      save();
+      var doublecheck_milestones = [2, 5, 10, 30]
+      var used = Profiles[val].visited.length
+
+      if(doublecheck_milestones.indexOf(used) != -1){
+        var pw = prompt("Congrats, you already enjoyed SecureLogin "+used+" times. Friendly reminder: you must remember your master password at all times. Can you type it again please?")
+        if(checksum(pw) == L.checksum){
+          alert("Correct, thanks!")
+          save();
+        }else{
+          alert("Incorrect, if you forgot it please change now")
+          main()
+          return false;
+        }
+      }
     }
 
     var sltoken = approve(L, m.provider, m.client, m.scope)
@@ -463,7 +475,9 @@ function hexToBase64(hexstring) {
     }).join(""));
 }
 
-
+function checksum(str){
+  return Benc( nacl.hash( Udec(str) )).substr(0,2)
+}
 
 
 
@@ -553,8 +567,14 @@ window.onload = (function(){
           visited: []
         }
 
-        // don't store too much, it's only for Doublecheck
-        new_profile.checksum = Benc( nacl.hash( Udec(password+','+email) )).substr(0,3)
+        /*
+        don't store too much, it's only for Doublecheck
+        currently it gives out 12 bits of the hash
+        i.e. it's 4096 times easier to bruteforce...
+        but checksum isn't supposed to leave the device 
+        and is as confidential as the root itself
+        */
+        new_profile.checksum = checksum(password)
 
         hide($('.step1'))
         show($('.step2'))

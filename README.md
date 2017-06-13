@@ -20,9 +20,11 @@ Here are 5 major problems it solves:
 
 5. __Malware__: SecureLogin 2.0 with Doublesign stops malware trying to act on behalf of your account – usually to steal your money. Doublesign is like a "two man rule" - the server must verify two signatures of "scope" which includes every detail of the transaction e.g. SWIFT, amount, currency, account number or Bitcoin address. The entire transaction is signed on both devices (usually desktop + mobile) so compromise of one of them wouldn't be enough to empty your bank account (unlike how it is now).
 
+6. __Phishing__: Many security experts tend to say phishing is the problem of the users not looking at the URL they type their password on. It's totally wrong. We belive phishing is an extremely important problem and we built-in the protocol in a way to make phishing impossible: every message is either sent to a Web/Extension via postMessage, revealing real `event.origin` or to a native app via `ws://127.0.0.1:3101` revealing `Origin` header.
+
 ### SecureLogin vs X
 
-SecureLogin is not a new OAuth (<a href="http://sakurity.com/oauth">but there's new better OAuth over here</a>), not a password manager, not a new 2FA option. It's all three in one protocol.
+SecureLogin is not a OAuth or Single Sign On like Mozilla Persona or Facebook Connect, not a password manager, not a new 2FA option. It's all three in one protocol.
 
 Let's list all popular auth methods and some esoteric ones to see how they deal with these 5 problems for normal users. 
 
@@ -36,6 +38,7 @@ Please note, password managers are not in the table because there's no such thin
     <th>Central Authority</th>
     <th>Register/Login/Recovery Usability</th>
     <th>MitM / Malware stealing money</th>
+    <th>Phishing</th>
     <th>Cost</th>
   </tr>
 
@@ -45,12 +48,17 @@ Please note, password managers are not in the table because there's no such thin
     <td class=g1>Email provider can set new pw</td>
     <td class=g1>Terrible UX</td>
     <td class=g1></td>
-    <td class=g3>Free (except cost of mail services)</td>
+    <td class=g1>-</td>
+    <td class=g3>```diff
++Free (except cost of mail services)
+```</td>
   </tr>
 
   <tr>
     <td>Standard + TOTP</td>
-    <td class=g1>- (first "factor" isn't fixed)</td>
+    <td class=g1>```diff
+- (first "factor" isn't fixed)
+```</td>
     <td class=g3>Password is not enough to login</td>
     <td class=g1>Terrible UX + inconvenient "paper" backup codes + typing 6 digits every time</td>
     <td class=g2>Delayed, not prevented (malware can wait for the user to enter OTP code)</td>
