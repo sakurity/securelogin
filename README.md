@@ -46,247 +46,78 @@ Please note, password managers are not in the table because there's no such thin
     <td>Standard</td>
     <td class=g1>Most people reuse passwords</td>
     <td class=g1>Email provider can set new pw</td>
-    <td class=g1>Terrible UX</td>
-    <td class=g1></td>
+    <td class=g1>Bad UX</td>
     <td class=g1>-</td>
-    <td class=g3>```diff
-+Free (except cost of mail services)
-```</td>
+    <td class=g1>-</td>
+    <td class=g3>**Free** (except cost of mail services)</td>
   </tr>
 
   <tr>
     <td>Standard + TOTP</td>
-    <td class=g1>```diff
-- (first "factor" isn't fixed)
-```</td>
-    <td class=g3>Password is not enough to login</td>
-    <td class=g1>Terrible UX + inconvenient "paper" backup codes + typing 6 digits every time</td>
-    <td class=g2>Delayed, not prevented (malware can wait for the user to enter OTP code)</td>
-    <td class=g3>Free</td>
+    <td class=g1>first "factor" isn't fixed</td>
+    <td class=g3>**Password is not enough**</td>
+    <td class=g1>Even worse UX + inconvenient backups</td>
+    <td class=g2>Delayed, not prevented</td>
+    <td class=g2>Phishable</td>
+    <td class=g3>**Free**</td>
   </tr>
 
   <tr>
     <td>Standard + U2F/Yubikey</td>
     <td class=g1>-</td>
-    <td class=g3>Password is not enough to login</td>
-    <td class=g1>Terrible UX, no usable backup strategy at all, no iOS support</td>
+    <td class=g3>**Password is not enough**</td>
+    <td class=g1>Worst UX, no usable backup strategy</td>
     <td class=g2>Delayed, not prevented</td>
+    <td class=g2>**Origin and nonce are signed**</td>
     <td class=g1>$19+ per plastic dongle</td>
   </tr>
 
   <tr>
     <td>Standard + SMS / Authy / Duo</td>
     <td class=g1>-</td>
-    <td class=g1>"Second" factor is a central authority too just like email provider. Plus vendor lock-in.</td>
-    <td class=g2>Duo offers nice user interface, but register/login experience is still slow and painful</td>
+    <td class=g1>"2nd factor" is a central authority. Vendor lock-in.</td>
+    <td class=g2>Overhead UX, a lot of actions</td>
     <td class=g2>Delayed, not prevented</td>
+    <td class=g2>Not fixed</td>
     <td class=g1><a href="https://duo.com/pricing">$3+/mo/user</a>, <a href="https://www.authy.com/product/pricing/">$0.1/request</a>, $0.05/SMS</td>
   </tr>
 
   <tr>
-    <td>Magic Link on Email / Mozilla Persona</td>
-    <td class=g3>No per-site passwords - no reuse</td>
+    <td>Magic Links on Email / Mozilla Persona</td>
+    <td class=g3>**No reuse**</td>
     <td class=g1>Email provider can login on behalf of your account</td>
-    <td class=g2>Greatly improved UX: that's why Slack and Medium already adopted Magic Links</td>
+    <td class=g2>**Greatly improved UX**: (see Slack or Medium)</td>
     <td class=g1>-</td>
-    <td class=g3>Free</td>
+    <td class=g1>Depends on implementation</td>
+    <td class=g3>**Free**</td>
   </tr>
 
   <tr>
-    <td>OAuth / OpenID / SAML / any SSO</td>
-    <td class=g3>No per-site passwords</td>
-    <td class=g1>OAuth provider can login on behalf of your account, vendor lock-in</td>
-    <td class=g3>Best UX: 2 clicks</td>
+    <td>OAuth / OpenID / SAML / SSO</td>
+    <td class=g3>**No per-site passwords**</td>
+    <td class=g1>Identity provider controls your account. Vendor lock-in</td>
+    <td class=g3>**Best UX: 2 clicks**</td>
     <td class=g1>-</td>
-    <td class=g3>Free</td>
-  </tr>
-
-
-  <tr class="esoteric">
-    <td>Trezor</td>
-    <td class=g3>+</td>
-    <td class=g3>Signing key never leaves your hardware token</td>
-    <td class=g1>Requires using a token every time, writing down 24 words, no iOS support</td>
-    <td class=g2>-</td>
-    <td class=g1><a href="https://shop.trezor.io">$128</a></td>
+    <td class=g1>**No phishing**</td>
+    <td class=g3>**Free**</td>
   </tr>
 
 
   <tr>
     <td>SecureLogin</td>
-    <td class=g3>No per-site passwords</td>
-    <td class=g3>Cryptographic key never leaves your device</td>
-    <td class=g3>Excellent sign-up and login user experience. Works on all platforms with all browsers</td>
-    <td class=g3>2.0 with Doublesign will protect from malware with scope-specific signature</td>
-    <td class=g3>Free and Open Source</td>
+    <td class=g3>**No per-site passwords</td>
+    <td class=g3>**Secret key never leaves your device**</td>
+    <td class=g3>**Excellent sign-up/login UX. Works on all platforms with all browsers**</td>
+    <td class=g3>scope-specific signature protects critical actions **(coming in 2.0)**</td>
+    <td class=g3>**All Origins are verified**</td>
+    <td class=g3>**Free and Open Source**</td>
   </tr>
 </table>
 
 
 # How it works?
 
-![Flow](https://user-images.githubusercontent.com/174693/26845447-26c08c22-4aff-11e7-9a31-9ce8f74fcd37.png)
-
-First, let's include this tiny helper:
-
-```javascript
-SecureLogin = function(scope){
-  function toQuery(obj){
-    return Object.keys(obj).reduce(function(a,k){a.push(encodeURIComponent(k)+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
-  }
-  var opts = {
-    provider: location.origin,
-    callback: 'ping',
-    state: crypto.getRandomValues(new Uint8Array(32)).reduce(function(a,k){return a+''+(k%32).toString(32)},'')
-  }
-
-  if(SecureLogin.pubkey) opts.pubkey = SecureLogin.pubkey
-  if(scope) opts.scope = toQuery(scope)
-  var query = toQuery(opts)
-  if(localStorage.securelogin || confirm("Do you have SecureLogin app installed?")){
-    localStorage.securelogin = 1
-    location = 'securelogin://#'+query
-  }else{
-    window.open('https://securelogin.pw/#' + query)        
-  }
-  return opts.state
-}
-```
-
-The "Secure Login" button on your website/app opens the native SecureLogin app: `securelogin://#provider=https://my.app&state=STATE` with the following parameters:
-
-**`provider`** - required. Use origin of your app eg https://my.app
-
-**`state`** - required. Generate a random string. SecureLogin app will ping `https://my.app/securelogin?state=STATE&response=SLTOKEN` while your initial request is waiting for SLTOKEN.
-
-At the same time it sends a request to your `/login` action:
-
-```javascript
-loginaccount.onclick=function(){
-  xhr('/login',{
-    sltoken: SecureLogin(), //returns state and opens the app
-    authenticity_token: csrf
-  }, function(d){
-    if(d == 'ok'){
-      // force focus, useful for Chrome in full screen
-      //if(document.visibilityState!='visible') alert("Logged in successfully.")
-      location.reload()
-    }else{
-      console.log(d)
-    }
-  })
-  return false;
-}
-```
-
-If the app is not installed it opens `https://securelogin.pw` instead which offers native apps for all platforms along with a Web version. 
-
-New users must type an email and **master password** to create a **Profile**. SecureLogin client runs key derivation function (scrypt) with `logN=18 p=6` which takes up to 20 seconds. 
-
-The keypair derivation is deterministic: running following code will generate the same **profile** on any machine:
-
-```ruby
-derived_root = require("scrypt").hashSync("masterpassword",{"N":Math.pow(2,18),"r":8,"p":6},32,"user@email.com").toString("base64")
-```
-
-Opening `securelogin://#provider=https://my.app&state=STATE` and clicking "Login" will make the following request internally:
-
-`https://my.app/securelogin?state=STATE&act=ping&response=https%3A%2F%2Fmy.app%252Chttps%3A%2F%2Fmy.app%2Fsecurelogin%252C%252C1496586322%2C2YNnncbnq7won%2B13AzJJqeBRREA9CTjYq%2FDwuGQAGy8LaQGnuH6OE10oLxV4kgJJhflnqdu0qY8bBC08v969Cg%3D%3D%252C%2Fbf0P0dBdDcQlak07UZpR4YnzPc2qw40jCSz1NAuw%2Bs%3D%2Ckdbjcc08YBKWdCY56lQJIi92wcGOW%2BKcMvbSgHN6WbU%3D%252C1uP20QU%2BWYvFf1KAxn3Re0ZYd2pm5vLdQhgkXTCjl44%3D%2Chomakov%40gmail.com`
-
-Which is handled by `/securelogin` path:
-
-```ruby
-def securelogin
-  state = params[:state].gsub(/[^a-z0-9]/,'')
-  response = params[:response].to_s
-  REDIS.setex("sl:#{state}", 100, response)
-  html "ok"
-end
-```
-
-This code puts params[:response] into Redis key-value storage so the simultaneous `/login` request the user made few seconds ago can pick it up and proceed.
-
-```ruby
-def self.await(state)
-  sltoken = false
-  state = state.gsub(/[^a-z0-9]/,'')
-  # user is given 20 seconds to approve the request
-  20.times{
-    sleep 1
-    sltoken = REDIS.get("sl:#{state}")
-    break if sltoken
-  }
-  
-  sltoken
-end
-```
-
-Once sltoken is received from internal ping, the `/login` action must check its validity:
-
-```
-def self.csv(str)
-  str.to_s.split(',').map{|f| URI.decode(f) }
-end
-
-message, signatures, authkeys, email = csv(response)
-
-pubkey, secret = csv(authkeys)
-signature, hmac_signature = csv(signatures)
-
-RbNaCl::VerifyKey.new(Base64.decode64(pubkey)).verify(Base64.decode64(signature), message) rescue error = 'Invalid signature' 
-
-provider, client, scope, expire_at = csv(message)
-
-scope = Rack::Utils.parse_query(scope)
-
-error = "Invalid provider" unless %w{http://128.199.242.161:8020 http://c.dev https://cobased.com}.include? provider
-error = "Invalid client" unless %w{http://128.199.242.161:8020/securelogin http://c.dev/securelogin https://cobased.com/securelogin}.include? client
-error = "Expired token" unless expire_at.to_i > Time.now.to_i
-
-if opts[:change] == true
-  error = "Not mode=change token" unless scope["mode"] == 'change' && scope.size == 2
-else
-  error = "Invalid scope" unless scope == (opts[:scope] || {})
-end
-
-```
-
-It unpacks the comma-separated-values `sltoken` to ensure `provider` is equal `https://my.app`, that `client` is equal `https://my.app/securelogin` (we will learn why clients can be on a 3rd party domain later), that `scope` is equal empty string (Login request), and that expire_at is valid.
-
-Format of `sltoken`:
-
-csv(csv(provider, client, scope, expire_at), csv(signature, hmac_signature), csv(pubkey, secret), email)
-
-Make sure the signature is valid for given pubkey. If the user with given pubkey does not exist, simply create a new account with given email. 
-
-If all assertions are correct, you can log the user in 
-
-```ruby
-def login
-  sltoken = SecureLogin.await(params[:sltoken])
-  return html "Timeout, please try again" unless sltoken
-
-  parsed = SecureLogin.parse(sltoken)
-
-  record = User.find_by(securelogin_pubkey: parsed[:securelogin_pubkey]) || User.create(parsed)
-
-  obj = SecureLogin.verify(sltoken, {
-    pubkey: record.securelogin_pubkey, 
-    secret: record.securelogin_secret
-  })
-
-  if obj[:error]
-    render plain: obj[:error]
-  else
-    session[:user_id] = record.id
-    html "ok"
-  end
-end
-```
-
-**Warning about Email verification**: the protocol does not confirm user email and does not intend to do so. In our vision an email provided is merely an address for mails, not a primary key / identifier like in the classic authentication scheme. I.e. two accounts can have equal email.
-
-We don't recommend to confirm / verify it at all and let user specify whatever they want **unless you are obligated by law to require explicit email confirmation**
+<a href="https://github.com/sakurity/securelogin-spec">See Protocol Specification</a> (being finalized now)
 
 Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. **Please get in touch** for any help with implementation.
 
@@ -346,11 +177,7 @@ Currently it's ~600 LOC in JS and 200 LOC in HTML. Most programmers can audit it
 
 ### 7. How do I change master password?
 
-Many people bashing deterministc approaches say that it's a hassle to manually change password on every website, while in password+vault approach you just change the encryption password and keep the actual content of the vault the same. This is naive and it's not paranoid enough to think that sometime in the future your actual vault will leak, as it's stored on a Dropbox-like service.
-
-Nevertheless, the change functionality is there: it's called Change SecureLogin which opens SL with scope=`mode=change`. In this mode SL client offers to change from current profile to another profile added to the app. After confirming the website must update the pubkey to a new one, and no one can log in with the old SL profile in that account. 
-
-You would have to do it with every service, and it will be automated to some extent.
+Just click inside the app and change it. See wiki https://github.com/sakurity/securelogin/wiki/How-password-is-changed
 
 ## Compatibility & known issues
 
@@ -358,9 +185,9 @@ The core functionality of SecureLogin is based on opening the native app, gettin
 
 ### macOS
 
-Chrome, Firefox: seamless experience. In Full Screen mode it's possible to focus back using alert() in Chrome (in Firefox alert does not focus)
+Chrome, Firefox: great. In Full Screen mode it's possible to focus back using alert() in Chrome (in Firefox alert does not focus)
 
-Safari: localStorage of /s proxy cannot detect users with native app (because of default privacy settings to drop 3rd party trackers). That's why we ask user to confirm(do you have app) everytime. Also no way to avoid 'Do you want to allow this page to open “SecureLogin.app”?' dialog every time. 
+Safari: OK. No way to avoid 'Do you want to allow this page to open “SecureLogin.app”?' dialog every time. 3 clicks required. Requires extra HTTP server for proxy page.
 
 TorBrowser: `SecurityError: The operation is insecure` when trying to open `securelogin://`
 
@@ -368,7 +195,7 @@ TorBrowser: `SecurityError: The operation is insecure` when trying to open `secu
 
 Edge: does not support custom protocol handlers like `securelogin://`. At all. They don't provide any roadmap. Use the Web version.
 
-Chrome: working fine.
+Chrome, Firefox: great.
 
 
 ### Linux
@@ -377,28 +204,34 @@ Chrome: working fine.
 
 ### iOS
 
-Safari: same as in Desktop safari, the `/s` proxy does not work because localStorage is blocked for iframes.
+All-in-all iOS and Safari are quite hostile to the flow SecureLogin uses on all other platforms.
 
-It's disallowed to simply close the app, so to go back to previous screen (Safari) the user must press top left corner icon, which is really small and barely visible.
+It takes **5 clicks** to get through regular login experience, while just 2 for all other platforms:
 
+1. SecureLogin button. opens a window that has another button to open SL client
+
+2. clicking second button opens third window (yes, it's required) where Safari finally asks to open the App
+
+3. Confirm opening, now HTTP & WS servers are running. 2nd tab is redirected to :3102/proxy.html and sends a message to WS with auth request
+
+4. Confirm request inside the app
+
+5. Press tiny "Back to Safari" sign in top left corner of the screen.
+
+Only 1 and 4 are required on other platforms. Due to bad UX and Safari not following the spec we drop iOS app for now. Users should use the web app (security of a native app on iOS is actually imaginary - the platform is way too closed down). We will iterate back to it and try to fix it with Action Extension for Safari (the way 1Password works right now). 
 
 ### Android
 
-Chrome: seamless experience, but no way to minimize the app so need 2 seconds delay before going to previous screen
+Chrome: great.
 
 
 
-### Anti-Phishing Concerns
 
-There's potential possibility of phishing attacks for `callback=ping` only: another hostile page may open `securelogin://state=THEIRSTATE` while you're navigating target website. You would not know which tab in your browser actually opened SL client, there's no way for JS to safely share its `location.origin` with the native app.
 
-Planned mitigations:
+## Chrome Extension
 
-1. IP binding for `sltoken` is recommended
+If you want to, side-load the CE directly from this repository. Preserve `"key"` inside manifest.json - it keeps chrome-extension URL static.
 
-2. Alert if the app was fired up twice in a row
-
-3. postMessage event.origin check (only for the Web app)
 
 ## Cordova
 
@@ -457,42 +290,6 @@ electron-packager . "SecureLogin" --overwrite --arch=x64 --platform=win32
 
 ## Roadmap
 
-1. Target developer community (hence everything is on Github and there is no marketing site). Only developers can validate the idea and decide to implement it
-
-2. Focus on SDK libaries and plugins for major CMS/frameworks/languages
-
-3. Engage with users and see what's unclear/buggy to them.
-
-4. SecureLogin Connect will replace OAuth for users who registred with SecureLogin. Simply put a client=http://consumer and provider=http://identity.provider - and the user will see "X requests access to your Y account"
-
-5. In the future, 2.0 will support binding two devices together and approving a `scope` from Desktop + Mobile. 
-
-6. Invest in more efficient derivation
-
-Inconsistent derivation is an issue among all platforms, especially for mobile. In the future, the current derivation scheme will be called "Weak" (18,6) and new ones will be added (like "Strong" for logN=18 p=20 ). Move to Argon2.
-
-7. Design and branding
-
-Proper logo and improve graphical design.
-
-8. Implement native apps for iOS and Android
-
-While Cordova and Electron are usable, SecureLogin is a small enough app that is cheap to implement for every platform using native architecture.
-
-9. Verifiable builds
-
-Get https://reproducible-builds.org/ for all platforms
-
-10. Setup Bug Bounty program
-
-11. Make sure people don't forget master passwords
-
-This is very important since the target audience is "general public": we need to draw a line between Legacy Passwords they could forget and used entire life and Master Passwords that you need just one, but **cannot forget**. Hygiene is completely different.
-
-Track usage and remind after 3, 10 and 30 successful signins to try to type master password again.
-
-
-12. Use secure enclaves for localStorage or analogs
-
+See Issues and Projects.
 
 

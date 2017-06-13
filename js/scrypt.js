@@ -5,23 +5,8 @@
  */
 
 
-
-
-//    unverified requests in cordova (deprecated)
-
 window.handleOpenURL = function(arg) {
   clearTimeout(window.delayed_launch)
-  /*
-  var hash = arg.substr(arg.indexOf('#')+1)
-  if(localStorage.current_profile){
-
-    console.log(hash)
-    messageDispatcher(fromQuery(hash));
-
-  }else{
-    location.hash = hash
-  }
-  */
 }
 
 
