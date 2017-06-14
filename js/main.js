@@ -361,14 +361,14 @@ function messageDispatcher(message){
     hide(btn)
     setTimeout(function(){
       show(btn)
-    }, 800)
+    }, 500)
   }
 
   btn.onclick = function(){
+    hide(btn) // to not click twice
+
     var val = Number($('.currentlist').value)
     L = getProfile(val);
-    console.log(val)
-
 
     if(!Profiles[val].visited){
       Profiles[val].visited = []
@@ -377,16 +377,18 @@ function messageDispatcher(message){
     // add once, and doublecheck pw
     if(Profiles[val].visited.indexOf(m.provider) == -1){
       Profiles[val].visited.push(m.provider)
-      var doublecheck_milestones = [2, 5, 10, 30]
+      save()
+      console.log('saving new visited provider')
+
+      var doublecheck_milestones = [2, 4, 8, 16]
       var used = Profiles[val].visited.length
 
       if(doublecheck_milestones.indexOf(used) != -1){
         var pw = prompt("Congrats, you already enjoyed SecureLogin "+used+" times. Friendly reminder: you must remember your master password at all times. Can you type it again please?")
-        if(checksum(pw) == L.checksum){
+        if(pw && checksum(pw) == L.checksum){
           alert("Correct, thanks!")
-          save();
         }else{
-          alert("Incorrect, if you forgot it please change now")
+          alert("Incorrect, if you forgot it please change it")
           main()
           return false;
         }
@@ -401,18 +403,48 @@ function messageDispatcher(message){
       //ipc to main processor
       E.ipcRenderer.send('response', sltoken)
     } else if(window.cordova && m.conn){
-      wsserver.send(m.conn, sltoken)
+      //Bug in WSS - sometimes nothing is sent. 
+      console.log('sending ',sltoken,m.conn)
+      var attempt = function(){
+        wsserver.send(m.conn, sltoken);
+      }
+
+      //wsserver.send(m.conn, sltoken);
+      attempt()
+      setTimeout(attempt, 200)
+      setTimeout(attempt, 400)
+      setTimeout(attempt, 600)
+      setTimeout(attempt, 800)
+
+      setTimeout(function(){
+        quit()
+      }, 1000)
+
+
       if(window.device && window.device.platform == 'iOS'){
         // on exit iOS returns to Home screen, not the app
         hide('.container')
         show('.ios')
       }else{
-        quit
+        /*setTimeout(function(){
+
+        
+        }, 100)*/
+
+
       }
     }
   }
 }
 
+function quit(){
+  wsserver.stop(function(addr, port) {
+    console.log('Stopped listening on %s:%d', addr, port);
+    setTimeout(function(){
+      navigator.app.exitApp()
+    },200)
+  });  
+}
 
 function approve(profile, provider, client, scope){
   var shared_secret = hmac( profile.shared_base , "secret:"+provider)
@@ -425,19 +457,6 @@ function approve(profile, provider, client, scope){
     ])
 }
 
-
-
-function quit(){
-  setTimeout(function(){  
-    if (navigator.app) {
-      navigator.app.exitApp();
-    } else if (navigator.device) {
-      navigator.device.exitApp();
-    } else {
-      window.close();
-    }
-  },300)
-}
 
 function derive(password, email, cb){
   var opts = {
@@ -604,7 +623,7 @@ window.onload = (function(){
     native[i].addEventListener('click', function(event) {
 
       localStorage.client = 'securelogin://'
-      console.log('enabled')
+      console.log('enabled native')
 
     });
   }
@@ -722,8 +741,9 @@ window.onload = (function(){
 })
 
 document.addEventListener('deviceready',function(){ 
-  httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
 
+  httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
+  /*
   httpd.getURL(function(url){
     if(url.length > 0) {
       console.log("running",url)
@@ -740,10 +760,12 @@ document.addEventListener('deviceready',function(){
     }
     
   });
+  */
 
 
   window.wsserver = window.cordova.plugins.wsserver
   trusted_proxy = 'http://127.0.0.1:3102'
+  l('try start')
   wsserver.start(3101, {
     'onFailure' :  function(addr, port, reason) {
       l("failure "+addr+ port+ reason);
@@ -756,27 +778,31 @@ document.addEventListener('deviceready',function(){
       console.log("message ",trusted)
       if(isLocalhost(conn.remoteAddr) && conn.httpFields.Origin){
         var trusted_json = JSON.parse(trusted)
-        var trusted_msg = fromQuery(trusted_json.data)
-        
-        //Trusted
-        if(conn.httpFields.Origin == trusted_proxy){
-          trusted_msg.client = trusted_json.origin
+        if(trusted_json.data == 'close'){
+          quit()
         }else{
-          trusted_msg.client = conn.httpFields.Origin
+          var trusted_msg = fromQuery(trusted_json.data)
+          
+          //Trusted
+          if(conn.httpFields.Origin == trusted_proxy){
+            trusted_msg.client = trusted_json.origin
+          }else{
+            trusted_msg.client = conn.httpFields.Origin
+          }
+          //pass over current conn
+          trusted_msg.conn = conn
+          messageDispatcher(trusted_msg)
         }
-        //pass over current conn
-        trusted_msg.conn = conn
-
-        messageDispatcher(trusted_msg)
         return false
       }
     },
     'onClose' : function(conn, code, reason) {
+      quit()
       l('disconnected '+conn.remoteAddr);
     },
     'tcpNoDelay' : true    
   }, function onStart(addr, port) {
-      //l("server "+addr+port);
+      l("server "+addr+port);
   }, function onDidNotStart(reason) {
       alert("server failed "+reason);
   });
