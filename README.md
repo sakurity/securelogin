@@ -31,88 +31,22 @@ Let's list all popular auth methods and some esoteric ones to see how they deal 
 Please note, password managers are not in the table because there's no such thing as a "password manager auth method" - a manager is merely not enforceable. However there is tiny 1% of password managers __users__.
 
 
-<table border=1px>
-  <tr>
-    <th>Auth Scheme</th>
-    <th>Reuse/3rd Party Leak</th>
-    <th>Central Authority</th>
-    <th>Register/Login/Recovery Usability</th>
-    <th>MitM / Malware stealing money</th>
-    <th>Phishing</th>
-    <th>Cost</th>
-  </tr>
+Scheme | Authority | Usability | Malware | Phishing | Cost
+--- | --- | --- | --- | --- | ---
+Standard | Email provider can set new pw | Poor | No | No | **Free**
 
-  <tr>
-    <td>Standard</td>
-    <td class=g1>Most people reuse passwords</td>
-    <td class=g1>Email provider can set new pw</td>
-    <td class=g1>Bad UX</td>
-    <td class=g1>-</td>
-    <td class=g1>-</td>
-    <td class=g3>**Free** (except cost of mail services)</td>
-  </tr>
+Standard + TOTP | Poor UX and backups | Delayed, not prevented | No | **Free**
 
-  <tr>
-    <td>Standard + TOTP</td>
-    <td class=g1>first "factor" isn't fixed</td>
-    <td class=g3>**Password is not enough**</td>
-    <td class=g1>Even worse UX + inconvenient backups</td>
-    <td class=g2>Delayed, not prevented</td>
-    <td class=g2>Phishable</td>
-    <td class=g3>**Free**</td>
-  </tr>
+Standard + U2F/Yubikey | Worst UX, no usable backup | Delayed, not prevented | **Origin and nonce are signed** | $18+ per dongle
 
-  <tr>
-    <td>Standard + U2F/Yubikey</td>
-    <td class=g1>-</td>
-    <td class=g3>**Password is not enough**</td>
-    <td class=g1>Worst UX, no usable backup strategy</td>
-    <td class=g2>Delayed, not prevented</td>
-    <td class=g2>**Origin and nonce are signed**</td>
-    <td class=g1>$19+ per plastic dongle</td>
-  </tr>
+Standard + SMS / Authy / Duo | "2nd factor" is a CA. Vendor lock-in | Overhead UX | Delayed, not prevented | Not fixed | $3+/mo/user Duo, $0.1/Authy request, $0.05/SMS
 
-  <tr>
-    <td>Standard + SMS / Authy / Duo</td>
-    <td class=g1>-</td>
-    <td class=g1>"2nd factor" is a central authority. Vendor lock-in.</td>
-    <td class=g2>Overhead UX, a lot of actions</td>
-    <td class=g2>Delayed, not prevented</td>
-    <td class=g2>Not fixed</td>
-    <td class=g1><a href="https://duo.com/pricing">$3+/mo/user</a>, <a href="https://www.authy.com/product/pricing/">$0.1/request</a>, $0.05/SMS</td>
-  </tr>
+Magic Links on Email / Mozilla Persona | Email provider can login on behalf of your account | **Greatly improved UX**: (see Slack or Medium) | No | Depends on implementation | **Free**
 
-  <tr>
-    <td>Magic Links on Email / Mozilla Persona</td>
-    <td class=g3>**No reuse**</td>
-    <td class=g1>Email provider can login on behalf of your account</td>
-    <td class=g2>**Greatly improved UX**: (see Slack or Medium)</td>
-    <td class=g1>-</td>
-    <td class=g1>Depends on implementation</td>
-    <td class=g3>**Free**</td>
-  </tr>
+OAuth / OpenID / SAML / SSO | Identity provider controls your account. Vendor lock-in | **Best UX: 2 clicks** | No | **No phishing** | **Free**
 
-  <tr>
-    <td>OAuth / OpenID / SAML / SSO</td>
-    <td class=g3>**No per-site passwords**</td>
-    <td class=g1>Identity provider controls your account. Vendor lock-in</td>
-    <td class=g3>**Best UX: 2 clicks**</td>
-    <td class=g1>-</td>
-    <td class=g1>**No phishing**</td>
-    <td class=g3>**Free**</td>
-  </tr>
+SecureLogin | No Authority | Smooth UX. All platforms/browsers | scope-specific signature protects critical actions **(coming in 2.0)** | **All Origins are verified** | **Free and Open Source**
 
-
-  <tr>
-    <td>SecureLogin</td>
-    <td class=g3>**No per-site passwords</td>
-    <td class=g3>**Secret key never leaves your device**</td>
-    <td class=g3>**Excellent sign-up/login UX. Works on all platforms with all browsers**</td>
-    <td class=g3>scope-specific signature protects critical actions **(coming in 2.0)**</td>
-    <td class=g3>**All Origins are verified**</td>
-    <td class=g3>**Free and Open Source**</td>
-  </tr>
-</table>
 
 
 # How it works?
