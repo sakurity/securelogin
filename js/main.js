@@ -526,7 +526,7 @@ window.onload = (function(){
     },1000)
   }
 
-  if(window.chrome){
+  if(window.chrome && window.chrome.tabs){
     // autofill if in ext
     chrome.tabs.query({active:true},function(t){
       // get origin and copy
@@ -831,3 +831,27 @@ document.addEventListener('deviceready',function(){
 function isLocalhost(ip){
   return ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(ip) != -1 || ip.indexOf('::ffff:127.0.0.1:') == 0
 }
+
+window.handleOpenURL = function(arg) {
+  clearTimeout(window.delayed_launch)
+}
+
+
+try{
+  window.nodeRequire = require;
+  delete window.require;
+  delete window.exports;
+  delete window.module;
+
+  E = nodeRequire('electron')
+
+  E.ipcRenderer.on('verifiedRequest', function(event, arg){
+    clearTimeout(window.delayed_launch)
+    var hash = fromQuery(arg.request)
+    hash.client = arg.client
+    messageDispatcher(hash)
+  })
+}catch(e){
+  E = false
+}
+
