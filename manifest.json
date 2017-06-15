@@ -1,6 +1,6 @@
 {
   "name": "SecureLogin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 2,
   "description": "SecureLogin Extension",
   "homepage_url": "https://securelogin.pw/",
@@ -9,7 +9,7 @@
             "128": "logo-128.png" },
 
   "permissions": [
-
+    "tabs"
   ],
   "web_accessible_resources": [ "index.html" ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhjR3XD7K9XNbz4z1kK/J1mbK4hq6mOZxClOd4yQOnF8XCxWTaE3Ugg1KyE6YolRpmllxYBO6oOu4rD2qJe2+S3NUNK6tK9m3L+xl58P2QmJ4EoEejsNKA5oOXqevm7aoX1M+09jDJV5+RuJt1KFkW+8uZuriNjVBGXABEw0i2x86DP+F9pdSzUWWr19Bzw8xbDazENZekRMnnuJHY7XmxhYeUqwa7HO/EC3FG7bSuNuaGmFQKwyTaIKm2jGMukJvBUyX+JC3IMEBF/RQhRHDAy13ONtQ1vH7IR+nYhKfZu2/4o50g3bdsxL4bVnGsJZZXBJQKpWcAS55zT6K65vyEwIDAQAB",
@@ -19,5 +19,5 @@
     "default_popup": "index.html"  
    },
 
-  "content_security_policy":"script-src 'self';object-src 'self'"
+  "content_security_policy":"script-src 'self'; object-src 'self'"
 }

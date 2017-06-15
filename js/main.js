@@ -515,7 +515,8 @@ window.onload = (function(){
     $('.managerpassword').value = pw
   }
   $('.managerprovider').oninput = legacypw
-
+  
+ 
   $('.managerpassword').onclick=function(){
     $('.managerpassword').select();
     document.execCommand('copy');
@@ -523,6 +524,22 @@ window.onload = (function(){
     setTimeout(function(){
       hide('.copymessage')
     },1000)
+  }
+
+  if(window.chrome){
+    // autofill if in ext
+    chrome.tabs.query({active:true},function(t){
+      // get origin and copy
+      if(t[0].url.indexOf('http')==0){
+        $('.managerprovider').value=t[0].url.split('/')[2];
+        legacypw();
+        setTimeout(function(){
+          $('.managerpassword').click();
+          window.close()
+        },100)
+      }
+
+    })
   }
 
 
