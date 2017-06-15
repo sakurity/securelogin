@@ -34,20 +34,12 @@ Please note, password managers are not in the table because there's no such thin
 Scheme | Authority | Usability | Malware | Phishing | Cost
 --- | --- | --- | --- | --- | ---
 Standard | Email provider can set new pw | Poor | No | No | **Free**
-
 Standard + TOTP | Poor UX and backups | Delayed, not prevented | No | **Free**
-
 Standard + U2F/Yubikey | Worst UX, no usable backup | Delayed, not prevented | **Origin and nonce are signed** | $18+ per dongle
-
 Standard + SMS / Authy / Duo | "2nd factor" is a CA. Vendor lock-in | Overhead UX | Delayed, not prevented | Not fixed | $3+/mo/user Duo, $0.1/Authy request, $0.05/SMS
-
 Magic Links on Email / Mozilla Persona | Email provider can login on behalf of your account | **Greatly improved UX**: (see Slack or Medium) | No | Depends on implementation | **Free**
-
 OAuth / OpenID / SAML / SSO | Identity provider controls your account. Vendor lock-in | **Best UX: 2 clicks** | No | **No phishing** | **Free**
-
 SecureLogin | No Authority | Smooth UX. All platforms/browsers | scope-specific signature protects critical actions **(coming in 2.0)** | **All Origins are verified** | **Free and Open Source**
-
-
 
 # How it works?
 

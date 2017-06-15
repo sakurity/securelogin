@@ -39,10 +39,12 @@ SecureLogin = function(cb, flow, scope){
 
       //in Safari we wait for the user to accept "Open in..."
       var opening = '<script>window.location = \'securelogin://\';</script>Please confirm opening SecureLogin.app...'
-      proxy = window.open('about:blank') //inherits same origin
       if(bowser.mac){
+        proxy = window.open('data:text/html,'+opening)
         proxy.document.body.innerHTML=(opening)
       }else{
+        proxy = window.open('about:blank') //inherits same origin
+
         // iOS Safari is even worse
         opensl = proxy.document.createElement('button')
         opensl.value = "Click to open!"
