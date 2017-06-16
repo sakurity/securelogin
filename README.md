@@ -39,7 +39,7 @@ Standard + U2F/Yubikey | **Decentralized** | Worst UX, no usable backup | Delaye
 Standard + SMS / Authy / Duo | "2nd factor" is a CA. Vendor lock-in | Overhead UX | Delayed, not prevented | Not fixed | $3+/mo/user Duo, $0.1/Authy request, $0.05/SMS
 Magic Links on Email / Mozilla Persona | Email provider is CA | **Greatly improved UX**: (see Slack or Medium) | No | **No phishing** | **Free**
 OAuth / OpenID / SAML / SSO | Identity provider controls your account. Vendor lock-in | **Best UX: 2 clicks** | No | **No phishing** | **Free**
-SecureLogin |  **Decentralized** | | **Smooth UX. All platforms/browsers** | scope-specific signature protects critical actions **(coming in 2.0)** | **All Origins are verified** | **Free and Open Source**
+SecureLogin |  **Decentralized** | **Smooth UX. All platforms/browsers** | scope-specific signature protects critical actions **(coming in 2.0)** | **Origins are verified ** | **Free and Open Source**
 
 # How it works?
 

@@ -21,8 +21,6 @@ function main(){
       $('.changefor').value = visited.join("\n")
     }
 
-
-
     if(inweb){
       if(opener){
         window.addEventListener('message', function(e){
@@ -542,18 +540,6 @@ window.onload = (function(){
     })
   }
 
-
-  $('.loaddev').onclick = function(){
-    if(localStorage.current_profile && confirm("Open experimental features?")){
-      show($('.dev'))
-
-      var s = document.createElement('script')
-      s.src = 'js/experimental.js'
-      document.body.appendChild(s)    
-    }
-  }
-
-
   $('.real-sign-in').onclick = function generation(){
     var errors = '';
     var password = $('#password').value;
@@ -638,8 +624,11 @@ window.onload = (function(){
   var native = document.querySelectorAll('.native')
   for (var i = 0; i < native.length; i++) {
     native[i].addEventListener('click', function(event) {
-
-      localStorage.client = 'securelogin://'
+      if(this.href.indexOf('chrome.google.com') != -1){
+        localStorage.client = 'ext'
+      }else{
+        localStorage.client = 'app'
+      }
       console.log('enabled native')
 
     });
@@ -715,18 +704,7 @@ window.onload = (function(){
     }
   }
 
-
   $('.logoutprofile').onclick = logout
-
-  /*
-  $('.enableweb').onclick = function(){
-    // this popup is considered annoying?
-    //if(confirm("SecureLogin Web client is much slower and less secure, try to install native app instead. Are you sure?")){
-      show($('.login-form'))
-      delete(localStorage.client)
-    //}
-  }*/
-
 
   window.inweb = ['http:','https:','chrome-extension:'].indexOf(location.protocol) != -1
   window.Profiles = localStorage.current_profile ? JSON.parse(localStorage.profiles) : []
@@ -760,7 +738,6 @@ window.onload = (function(){
 document.addEventListener('deviceready',function(){ 
 
   httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
-  /*
   httpd.getURL(function(url){
     if(url.length > 0) {
       console.log("running",url)
@@ -777,9 +754,7 @@ document.addEventListener('deviceready',function(){
     }
     
   });
-  */
-
-
+  
   window.wsserver = window.cordova.plugins.wsserver
   trusted_proxy = 'http://127.0.0.1:3102'
   l('try start')

@@ -1,9 +1,31 @@
+
+// self discovery, not on safari
+if(!localStorage.securelogin && !bowser.safari){
+  window.addEventListener('load',function(){
+    var sproxy = document.createElement('iframe')
+    sproxy.src = 'https://securelogin.pw/s'
+    sproxy.style.display='none'
+    document.body.appendChild(sproxy)
+    window.addEventListener('message',function(o){
+      if(o.origin == 'https://securelogin.pw'){
+        console.log(o.data)
+        localStorage.securelogin = o.data.client
+        //document.querySelector('[data-client="app"]').style.display='none'
+
+      }
+    })
+  })
+}
+
+
+
 SecureLogin = function(cb, flow, scope){
   console.log("Starting SecureLogin "+flow);
 
   function toQuery(obj){
     return Object.keys(obj).reduce(function(a,k){a.push(encodeURIComponent(k)+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
   }
+
   var opts = {}
 
   if(SecureLogin.pubkey) opts.pubkey = SecureLogin.pubkey
@@ -46,7 +68,7 @@ SecureLogin = function(cb, flow, scope){
         proxy = window.open('about:blank') //inherits same origin
 
         // iOS Safari is even worse
-        opensl = proxy.document.createElement('button')
+        opensl = proxy.document.createElement('input')
         opensl.value = "Click to open!"
         opensl.onclick = function(){
           p2=proxy.window.open('about:blank')
