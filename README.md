@@ -49,7 +49,18 @@ Check out <a href="https://github.com/homakov/cobased/blob/master/app/controller
 
 ### SDK, implementations and libraries
 
-<a href="https://github.com/homakov/cobased">Ruby on Rails implementation</a>
+#### Implementations
+
+##### Ruby on Rails
+
+- [Cobased](https://github.com/homakov/cobased)
+
+#### Libraries
+
+##### Node.js
+
+- [node-securelogin](https://github.com/andrewda/node-securelogin)
+- [passport-securelogin](https://github.com/andrewda/passport-securelogin)
 
 Help needed for implementations for:
 
