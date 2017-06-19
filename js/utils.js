@@ -88,11 +88,6 @@
 
 
 
-
-
-
-
-
 (function(root, f) {
   'use strict';
   if (typeof module !== 'undefined' && module.exports) module.exports = f(require('tweetnacl'));
@@ -140,3 +135,161 @@
   return auth;
 
 }));
+
+
+
+
+// DOM manipulation short cuts
+
+function $(id){
+  return document.querySelector(id);
+}
+
+function $$(id){
+  return document.querySelectorAll(id);
+}
+
+function hide(el){
+  if(typeof el == 'string') el=$(el)
+  el.style.display='none'
+}
+
+function show(el){
+  if(typeof el == 'string') el=$(el)
+  el.style.display='block'
+}
+
+// primarily used for `scope`
+
+toQuery=function(obj) {
+  return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
+}
+
+var whitelist = 'provider client scope expire_at confirmed callback state'.split(' ')
+
+fromQuery=function(str) {
+  if(typeof str != 'string' || str=='') return {}
+  var o = {};
+  str.split('&').map(function(pair){
+    var pair = pair.split('=');
+    o[decodeURIComponent(pair[0])]=decodeURIComponent(pair[1]);
+  })
+  return o;
+}
+
+
+
+// to Uint8Array/Base64 and back
+
+function Benc(str){
+  return nacl.util.encodeBase64(str);
+}
+
+function Bdec(str){
+  return nacl.util.decodeBase64(str);
+}
+
+function Uenc(str){
+  return nacl.util.encodeUTF8(str);
+}
+
+function Udec(str){
+  return nacl.util.decodeUTF8(str);
+}
+
+// crypto short cuts
+
+function hmac(secret, message){
+  return Benc(nacl.auth(Udec(message), Bdec(secret)))
+}
+
+function sign(message, priv){
+  return Benc(nacl.sign.detached(Udec(message),Bdec(priv)))
+}
+
+
+function screen(label){
+  //show($('.container'))
+  var conts = $$('.screen')
+  for(var i=0;i<conts.length;i++){
+    if(conts[i].classList.contains(label)){
+      show(conts[i])
+    }else{
+      hide(conts[i])
+    }
+  }
+}
+
+function format(origin){
+  var formatted = origin.split('/')[2];
+  return formatted[0].toUpperCase() + formatted.substr(1);
+}
+
+
+
+
+
+function logout(){
+  if(confirm("You will not lose any data, but you will have to enter same email & password to log in this profile again")){
+    if(Profiles.length > 1){
+      Profiles.splice(Number(localStorage.current_profile), 1)
+      localStorage.current_profile = Object.keys(Profiles)[0]
+      main()
+    }else{
+      localStorage.clear()
+      location.hash = ''
+      location.reload()
+    }
+  }
+}
+
+function l(a){
+  console.log(a)
+}
+
+function secondsFromNow(seconds){
+  return (Math.floor(new Date / 1000)) + seconds
+}
+
+// escape HTML entities
+
+var entityMap = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': '&quot;',
+  "'": '&#39;',
+  "/": '&#x2F;'
+};
+
+function e(string) {
+  return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+// escaped CSV, JSON would be overhead
+
+function csv(str){
+  if(str instanceof Array){
+    return str.map(function(el){
+      return el.toString().replace(/[%,]/g,function(f){
+        return f=='%'?'%25':'%2C'
+      })
+    }).join(',')
+  }else{
+    return str.split(',').map(function(el){
+      return el.replace(/(%25|%2C)/g,function(f){
+        return f=='%25'?'%':','
+      })
+    })
+  }
+}
+
+
+function getRandomValues(num){
+  return window.crypto.getRandomValues(new Uint8Array(num))
+}
+
+
+

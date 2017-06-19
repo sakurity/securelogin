@@ -8,13 +8,13 @@ SecureLogin is a decentralized authentication protocol for websites and apps. Cl
 
 <a href="https://medium.com/@homakov/securelogin-forget-about-passwords-c1bf7b47f698">Blog post on 1.0 release and our Principles.</a>
 
-Here are 5 major problems it solves:
+Here are major problems it solves:
 
 1. __Password reuse__: SecureLogin's #1 goal is to fix password reuse and simplify authentication process. It should work for everyone, not only for geeks.
 
-2. __Usability__: existing onboarding process is a disaster for conversion: Email, confirm email, password, confirm password, wait you need one digit and one capital letter, think of a new password, sign up and go to email box to click "Confirm My Email" a 1000th time in your life. **With SecureLogin, it's just two clicks.**
+2. __Convenience__: existing onboarding process is a disaster for conversion: Email, confirm email, password, confirm password, wait you need one digit and one capital letter, think of a new password, sign up and go to email box to click "Confirm My Email" a 1000th time in your life. **With SecureLogin, it's just two clicks.**
 
-3. __Central authority__: Currently every account depends on an email, which can be used to set a new password. Email is very centralized - majority uses services like Gmail. This is even worse for SMS, which is owned by telecom corporations. This attack is currently exploited in the wild only against political activists, but there's no need to wait for someone to hack a major email/SMS provider – __with SecureLogin there's no central authority, no central server and no way to hijack your account__.
+3. __Centralization__: Currently every account depends on an email, which can be used to set a new password. Email is very centralized - majority uses services like Gmail. This is even worse for SMS, which is owned by telecom corporations. This attack is currently exploited in the wild only against political activists, but there's no need to wait for someone to hack a major email/SMS provider – __with SecureLogin there's no central authority, no central server and no way to hijack your account__.
 
 4. __Man-in-the-Middle__: interaction of the user computer and the server is often compromised in between: broken HTTPS, CloudFlare, malicious browser extensions, Man-in-the-Browser and XSS can be prevented when the user explicitly signs every critical transaction. 
 
@@ -26,7 +26,7 @@ Here are 5 major problems it solves:
 
 SecureLogin is not a OAuth or Single Sign On like Mozilla Persona or Facebook Connect, not a password manager, not a new 2FA option. It's all three in one protocol.
 
-Let's list all popular auth methods and some esoteric ones to see how they deal with these 5 problems for normal users. 
+Let's list all popular auth methods and some esoteric ones to see how they deal with these problems for normal users. 
 
 Please note, password managers are not in the table because there's no such thing as a "password manager auth method" - a manager is merely not enforceable. However there is tiny 1% of password managers __users__.
 
@@ -39,7 +39,8 @@ Standard + U2F/Yubikey | **Decentralized** | Worst UX, no usable backup | Delaye
 Standard + SMS / Authy / Duo | "2nd factor" is a CA. Vendor lock-in | Overhead UX | Delayed, not prevented | Not fixed | $3+/mo/user Duo, $0.1/Authy request, $0.05/SMS
 Magic Links on Email / Mozilla Persona | Email provider is CA | **Greatly improved UX**: (see Slack or Medium) | No | **No phishing** | **Free**
 OAuth / OpenID / SAML / SSO | Identity provider controls your account. Vendor lock-in | **Best UX: 2 clicks** | No | **No phishing** | **Free**
-SecureLogin |  **Decentralized** | **Smooth UX. All platforms/browsers** | scope-specific signature protects critical actions **(coming in 2.0)** | **Origins are verified ** | **Free and Open Source**
+SecureLogin |  **Decentralized** | **Smooth UX. All platforms/browsers** | 2.0 has scope-specific signatures | **No phishing** | **Free and Open Source**
+
 
 # How it works?
 
@@ -47,7 +48,11 @@ SecureLogin |  **Decentralized** | **Smooth UX. All platforms/browsers** | scope
 
 Check out <a href="https://github.com/homakov/cobased/blob/master/app/controllers/application_controller.rb#L33-L76">real verification Ruby code for our Playground</a>. **Please get in touch** for any help with implementation.
 
-### SDK, implementations and libraries
+### Add SecureLogin in 5 minutes
+
+
+
+
 
 <a href="https://github.com/homakov/cobased">Ruby on Rails implementation</a>
 

@@ -37,8 +37,6 @@ function main(){
       }
     }
 
-
-
     show($('.main-form'))
 
   }else{
@@ -87,172 +85,6 @@ function getProfile(n){
 
   return profile
 }
-
-
-function logout(){
-  if(confirm("You will not lose any data, but you will have to enter same email & password to log in this profile again")){
-    if(Profiles.length > 1){
-      Profiles.splice(Number(localStorage.current_profile), 1)
-      localStorage.current_profile = Object.keys(Profiles)[0]
-      main()
-    }else{
-      localStorage.clear()
-      location.hash = ''
-      location.reload()
-    }
-  }
-}
-
-
-function redirect(uri){
-  var test_uri = uri.replace(/[^a-zA-Z:]/g,'');
-  if(test_uri.match(/^(javascript|data|mailto|securelogin):/) ){
-    console.log(uri+" is invalid URI");
-    return false;
-  }else{
-    l("Redirecting to "+uri);
-  }
-
-  if(E){
-    E.shell.openExternal(uri);
-  }else{
-    location = uri
-  }
-}
-
-function l(a){
-  console.log(a)
-}
-
-function secondsFromNow(seconds){
-  return (Math.floor(new Date / 1000)) + seconds
-}
-
-// escape HTML entities
-
-var entityMap = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': '&quot;',
-  "'": '&#39;',
-  "/": '&#x2F;'
-};
-
-function e(string) {
-  return String(string).replace(/[&<>"'\/]/g, function (s) {
-    return entityMap[s];
-  });
-}
-
-// escaped CSV, JSON would be overhead
-
-function csv(str){
-  if(str instanceof Array){
-    return str.map(function(el){
-      return el.toString().replace(/[%,]/g,function(f){
-        return f=='%'?'%25':'%2C'
-      })
-    }).join(',')
-  }else{
-    return str.split(',').map(function(el){
-      return el.replace(/(%25|%2C)/g,function(f){
-        return f=='%25'?'%':','
-      })
-    })
-  }
-}
-
-
-function getRandomValues(num){
-  return window.crypto.getRandomValues(new Uint8Array(num))
-}
-
-// DOM manipulation short cuts
-
-function $(id){
-  return document.querySelector(id);
-}
-
-function $$(id){
-  return document.querySelectorAll(id);
-}
-
-function hide(el){
-  if(typeof el == 'string') el=$(el)
-  el.style.display='none'
-}
-
-function show(el){
-  if(typeof el == 'string') el=$(el)
-  el.style.display='block'
-}
-
-// primarily used for `scope`
-
-toQuery=function(obj) {
-  return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&')
-}
-
-var whitelist = 'provider client scope expire_at confirmed callback state'.split(' ')
-
-fromQuery=function(str) {
-  if(typeof str != 'string' || str=='') return {}
-  var o = {};
-  str.split('&').map(function(pair){
-    var pair = pair.split('=');
-    o[decodeURIComponent(pair[0])]=decodeURIComponent(pair[1]);
-  })
-  return o;
-}
-
-// to Uint8Array/Base64 and back
-
-function Benc(str){
-  return nacl.util.encodeBase64(str);
-}
-
-function Bdec(str){
-  return nacl.util.decodeBase64(str);
-}
-
-function Uenc(str){
-  return nacl.util.encodeUTF8(str);
-}
-
-function Udec(str){
-  return nacl.util.decodeUTF8(str);
-}
-
-// crypto short cuts
-
-function hmac(secret, message){
-  return Benc(nacl.auth(Udec(message), Bdec(secret)))
-}
-
-function sign(message, priv){
-  return Benc(nacl.sign.detached(Udec(message),Bdec(priv)))
-}
-
-
-function screen(label){
-  //show($('.container'))
-  var conts = $$('.screen')
-  for(var i=0;i<conts.length;i++){
-    if(conts[i].classList.contains(label)){
-      show(conts[i])
-    }else{
-      hide(conts[i])
-    }
-  }
-}
-
-function format(origin){
-  var formatted = origin.split('/')[2];
-  return formatted[0].toUpperCase() + formatted.substr(1);
-}
-
-
 
 
 
@@ -409,28 +241,12 @@ function messageDispatcher(message){
 
       //wsserver.send(m.conn, sltoken);
       attempt()
-      setTimeout(attempt, 200)
-      setTimeout(attempt, 400)
-      setTimeout(attempt, 600)
-      setTimeout(attempt, 800)
+      setInterval(attempt, 100)
 
       setTimeout(function(){
         quit()
       }, 1000)
 
-
-      if(window.device && window.device.platform == 'iOS'){
-        // on exit iOS returns to Home screen, not the app
-        hide('.container')
-        show('.ios')
-      }else{
-        /*setTimeout(function(){
-
-        
-        }, 100)*/
-
-
-      }
     }
   }
 }
@@ -538,6 +354,14 @@ window.onload = (function(){
       }
 
     })
+    chrome.runtime.onInstalled.addListener(function(details){
+      if(details.reason == "install"){
+        console.log("This is a first install!");
+      }else if(details.reason == "update"){
+        var thisVersion = chrome.runtime.getManifest().version;
+        console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
+      }
+    });
   }
 
   $('.real-sign-in').onclick = function generation(){
@@ -554,13 +378,7 @@ window.onload = (function(){
       errors += 'Password must be at least 8 characters. '
     }
 
-    Profiles.map(function(e){ if(e.email == email){
-      // we technically can have many profiles with equal email
-      // but does average user need such compartmentation?
-      // to prevent "email [2]" labels
-
-      errors += "You already used this email for another profile. "}  
-    })
+    Profiles.map(function(e){ if(e.email == email){ errors += "You already used this email for another profile. "}  })
 
     if(errors.length > 0){
       alert(errors);
@@ -578,7 +396,6 @@ window.onload = (function(){
       var start_derive = new Date
       derive(password, email, function(root){
         // send stats about current device and derivation benchmark
-
 
         new_profile = {
           email: email,
@@ -710,16 +527,6 @@ window.onload = (function(){
   window.Profiles = localStorage.current_profile ? JSON.parse(localStorage.profiles) : []
 
   if(inweb && location.protocol != 'chrome-extension:'){
-    
-    if(location.hash=='#native'){
-      // proxy to native app
-      screen('generation')
-      hide($('.step1'))
-      hide($('.step2'))
-      return false
-    }
-
-
   }else{
     hide($('.in-web'));
   }
@@ -736,7 +543,7 @@ window.onload = (function(){
 })
 
 document.addEventListener('deviceready',function(){ 
-
+  /*
   httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
   httpd.getURL(function(url){
     if(url.length > 0) {
@@ -754,6 +561,7 @@ document.addEventListener('deviceready',function(){
     }
     
   });
+  */
   
   window.wsserver = window.cordova.plugins.wsserver
   trusted_proxy = 'http://127.0.0.1:3102'
