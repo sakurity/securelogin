@@ -1,12 +1,14 @@
 window.addEventListener('load',function(){
   // safari violates mixed content spec, so no app
   if(!bowser.safari){
-    document.querySelector('[data-client="app"]').style.display='inline-block'
+    var btn = document.querySelector('[data-client="app"]')
+    if(btn) btn.style.display='inline-block'
   }
   // ext only on chrome
   var desktop = (bowser.mac || bowser.linux || bowser.windows || bowser.chromeos)
   if(bowser.chrome && desktop){
-    document.querySelector('[data-client="ext"]').style.display='inline-block'
+    var btn = document.querySelector('[data-client="ext"]')
+    if(btn) btn.style.display='inline-block'
   }
 })
 

@@ -15,11 +15,11 @@ function main(){
     save()
     listProfiles()
 
-
-    var visited = Profiles[Number(localStorage.current_profile)].visited
-    if(visited){
-      $('.changefor').value = visited.join("\n")
+    L = Profiles[Number(localStorage.current_profile)]
+    if(L.visited){
+      $('.changefor').value = L.visited.join("\n")
     }
+    $('.newemail').value = L.email
 
     if(inweb){
       if(opener){
@@ -260,6 +260,13 @@ function quit(){
   });  
 }
 
+function allclick(mask, listener){
+  var elements = document.querySelectorAll(mask)
+  for (var i = 0; i < elements.length; i++) {
+    elements[i].addEventListener('click', listener);
+  }
+}
+
 function approve(profile, provider, client, scope){
   var shared_secret = hmac( profile.shared_base , "secret:"+provider)
   var to_sign = csv([provider, client, scope, secondsFromNow(60)])
@@ -438,18 +445,17 @@ window.onload = (function(){
     }
   }
 
-  var native = document.querySelectorAll('.native')
-  for (var i = 0; i < native.length; i++) {
-    native[i].addEventListener('click', function(event) {
-      if(this.href.indexOf('chrome.google.com') != -1){
-        localStorage.client = 'ext'
-      }else{
-        localStorage.client = 'app'
-      }
-      console.log('enabled native')
+  allclick('.native', function(event) {
+    if(this.href.indexOf('chrome.google.com') != -1){
+      localStorage.client = 'ext'
+    }else{
+      localStorage.client = 'app'
+    }
+    console.log('enabled native')
 
-    });
-  }
+  })
+
+  allclick('.back', main)
 
 
 
@@ -460,17 +466,20 @@ window.onload = (function(){
 
   $('.changeconfirm').onclick = function(){
     var newpw = $('.newpw').value
+    var newemail = $('.newemail').value
     var providers = $('.changefor').value.split("\n")
-
+    //TODO: validate
     if(confirm("You won't be able to use profile created with old password anymore. Are you sure?")){
       var n=Number(localStorage.current_profile)
       var old_profile = getProfile(n)
       var new_profile = Object.assign({}, Profiles[n])
 
+
       changestatus.innerHTML += '<tr><td>Please wait, generating new key...</td><td></td></tr>'
 
-      derive(newpw, old_profile.email, function(root){
+      derive(newpw, newemail, function(root){
         new_profile.root = root // updated root
+        new_profile.email = newemail // updated root
         new_profile.shared_base = hmac(new_profile.root, 'shared');
         new_profile.shared_key = nacl.sign.keyPair.fromSeed( Bdec(new_profile.shared_base) )
 
@@ -503,21 +512,19 @@ window.onload = (function(){
 
             }
           }
-          xhr.send()
-
- 
+          try{
+            xhr.send()
+          }catch(e){console.log("error changing profile")}
         }
 
         // TODO: need to make sure if some provider is down, profile is not changed
         // backup old key?
-
+        changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
         Profiles[n].root = new_profile.root;
+        Profiles[n].email = new_profile.email;
+        Profiles[n].checksum = checksum(newpw);
         save()
-
-
-
       })      
-
     }
   }
 
