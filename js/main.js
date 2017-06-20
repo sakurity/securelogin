@@ -65,8 +65,8 @@ function listProfiles (useProfile) {
     } else {
       usedTitles.push(title)
     }
-
-    list += '<option ' + (Number(useProfile) === i ? 'selected' : '') + ' value="' + i + '">' + title + '</option>'
+    var selected = (Number(useProfile) === Number(i) ? 'selected' : '')
+    list += '<option ' + selected + ' value="' + i + '">' + title + '</option>'
   }
 
   // All dropdowns have up-to-date list
@@ -260,11 +260,13 @@ function allclick (mask, listener) {
 function approve (profile, provider, client, scope) {
   var sharedSecret = hmac(profile.shared_base, 'secret:' + provider)
   var toSign = csv([provider, client, scope, secondsFromNow(60)])
+  // Email and sharedSecret are shared only on login requests
+  var isLogin = (scope === '' && provider === client)
   return csv([
     toSign,
     csv([sign(toSign, Benc(profile.shared_key.secretKey)), hmac(sharedSecret, toSign)]),
-    csv([Benc(profile.shared_key.publicKey), (provider === client) ? sharedSecret : '']), // We don't leak sharedSecret to Connect requests
-    profile.email
+    csv([Benc(profile.shared_key.publicKey), isLogin ? sharedSecret : '']),
+    isLogin ? profile.email : '' 
   ])
 }
 
@@ -467,6 +469,7 @@ window.onload = function () {
         newProfile.email = newemail // updated root
         newProfile.shared_base = hmac(newProfile.root, 'shared')
         newProfile.shared_key = nacl.sign.keyPair.fromSeed(Bdec(newProfile.shared_base))
+        var awaitRequests = providers.length
 
         for (var i = 0; i < providers.length; i++) {
           var p = providers[i]
@@ -480,37 +483,42 @@ window.onload = function () {
             to: newToken
           }))
 
+
           var xhr = new XMLHttpRequest()
+          xhr.open('POST', p + '/securelogin')
+          xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+          xhr.onreadystatechange = (function (provider) {
+            return function () {
+              if (xhr.readyState === 4) {
+                var status = ({
+                  changed: 'Changed',
+                  not_found: 'User is not found',
+                  invalid_request: 'Invalid request',
+                  invalid_token: 'Invalid token',
+                  pubkey_exist: 'This user already exists'
+                })[xhr.response]
 
-          // Sync for now to not make a lot of requests at once
-          xhr.open('GET', p + '/securelogin?sltoken=' + encodeURIComponent(changeToken), true)
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-              var status = ({
-                changed: 'Changed',
-                not_found: 'User is not found',
-                invalid_request: 'Invalid request',
-                invalid_token: 'Invalid token',
-                pubkey_exist: 'This user already exists'
-              })[xhr.response]
+                window.changestatus.innerHTML += '<tr><td>' + e(format(provider)) + '</td><td>' + e(status) + '</td></tr>'
 
-              window.changestatus.innerHTML += '<tr><td>' + e(format(p)) + '</td><td>' + e(status) + '</td></tr>'
+                if (--awaitRequests == 0){
+                  window.changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
+                  Profiles[n].root = newProfile.root
+                  Profiles[n].email = newProfile.email
+                  Profiles[n].checksum = checksum(newpw)
+                  save()
+                }
+              }
             }
-          }
+          })(p)
+
+
           try {
-            xhr.send()
+            xhr.send('sltoken=' + encodeURIComponent(changeToken))
           } catch (e) {
             console.log('error changing profile')
           }
         }
 
-        // TODO: We need to make sure that if some provider is down, profile is not changed
-        // backup old key?
-        window.changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
-        Profiles[n].root = newProfile.root
-        Profiles[n].email = newProfile.email
-        Profiles[n].checksum = checksum(newpw)
-        save()
       })
     }
   }

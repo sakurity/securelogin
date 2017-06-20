@@ -31,15 +31,15 @@ Let's list all popular auth methods and some esoteric ones to see how they deal 
 Please note, password managers are not in the table because there's no such thing as a "password manager auth method" - a manager is merely not enforceable. However there is tiny 1% of password managers __users__.
 
 
-Scheme | Decentralization | Usability | Malware | Phishing | Cost / Scalability
+Scheme | Decentralization | Usability | Anti-Malware | Anti-Phishing | Cost / Scalability
 --- | --- | --- | --- | --- | ---
 Standard | Email provider can set new pw | Poor | No | No | **Free**
 Standard + TOTP | **Decentralized** | Poor UX and backups | Delayed, not prevented | No | **Free**
-Standard + U2F/Yubikey | **Decentralized** | Worst UX, no usable backup | Delayed, not prevented | **Origin and nonce are signed** | $18+ per dongle
+Standard + U2F/Yubikey | **Decentralized** | Worst UX, no usable backup | Delayed, not prevented | **No phishing** | $18+ per dongle
 Standard + SMS / Authy / Duo | "2nd factor" is a CA. Vendor lock-in | Overhead UX | Delayed, not prevented | Not fixed | $3+/mo/user Duo, $0.1/Authy request, $0.05/SMS
 Magic Links on Email / Mozilla Persona | Email provider is CA | **Greatly improved UX**: (see Slack or Medium) | No | **No phishing** | **Free**
 OAuth / OpenID / SAML / SSO | Identity provider controls your account. Vendor lock-in | **Best UX: 2 clicks** | No | **No phishing** | **Free**
-SecureLogin |  **Decentralized** | **Smooth UX. All platforms/browsers** | 2.0 has scope-specific signatures | **No phishing** | **Free and Open Source**
+SecureLogin |  **Decentralized** | **Best UX: 2 clicks** | 2.0 has scope-specific signatures | **No phishing** | **Free and Open Source**
 
 
 # How it works?
