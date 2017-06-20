@@ -2,7 +2,7 @@
 
 ### Abstract
 
-<a href="https://cobased.com">Try the demo now?</a>
+Before you dig into details, try the demos: <a href="https://cobased.com">Rails demo</a>, <a href="https://passport-securelogin.herokuapp.com">Node.js demo</a>
 
 SecureLogin is a decentralized authentication protocol for websites and apps. Classic passwords/2FA are poorly designed, hard to backup and inconvenient to use. SecureLogin is an all-in-one solution that creates a cryptographic private key from your email and master password to sign in everywhere and helps you to forget about passwords.
 
@@ -56,9 +56,11 @@ Check out <a href="https://github.com/homakov/cobased/blob/master/app/controller
 
 #### Implementations
 
-##### Ruby on Rails
+##### Ruby (Reference implementation)
 
-- [Cobased](https://github.com/homakov/cobased)
+`gem install securelogin`
+
+- [Rails demo](https://github.com/homakov/cobased)
 
 #### Libraries
 

@@ -278,11 +278,15 @@ function derive (password, email, cb) {
     r: 8,
     dkLen: 32,
     encoding: 'base64'
-  } // 1 1 cinii
+  }
+
+  if (email === 'smoke@test.test') {
+    opts.p = 1
+    opts.N = 4
+  }
 
   if (window.E) {
     try {
-      // No success compiling scrypt for windows
       window.npm_scrypt = nodeRequire('scrypt')
     } catch (e) {}
   }
@@ -291,7 +295,7 @@ function derive (password, email, cb) {
     window.npm_scrypt.hash(password, opts, 32, email).then(function (root) {
       cb(root.toString('base64'))
     })
-  } else if (email !== 'force@scrypt.com' && window.plugins && window.plugins.scrypt) {
+  } else if (email !== 'scryptjs@test.test' && window.plugins && window.plugins.scrypt) {
     // Sometimes we want to make sure native plugin is faster
     window.plugins.scrypt(function (root) {
       cb(hexToBase64(root))
@@ -309,6 +313,12 @@ function hexToBase64 (hexstring) {
 
 function checksum (str) {
   return Benc(nacl.hash(Udec(str))).substr(0, 2)
+}
+
+function status (msg) {
+  var p = document.createElement('p')
+  p.innerHTML = msg
+  $('.status').appendChild(p)
 }
 
 window.onload = function () {
@@ -462,7 +472,7 @@ window.onload = function () {
       var oldProfile = getProfile(n)
       var newProfile = Object.assign({}, Profiles[n])
 
-      window.changestatus.innerHTML += '<tr><td>Please wait, generating new key...</td><td></td></tr>'
+      status('Please wait, generating new key...')
 
       derive(newpw, newemail, function (root) {
         newProfile.root = root // updated root
@@ -477,31 +487,35 @@ window.onload = function () {
             p = 'https://' + p
           }
 
-          var newToken = approve(newProfile, p, p, '')
-          var changeToken = approve(oldProfile, p, p, toQuery({
+          var newToken = toQuery({
             mode: 'change',
-            to: newToken
-          }))
+            to: approve(newProfile, p, p, '')
+          })
 
+          var changeToken = approve(oldProfile, p, p, newToken);
 
-          var xhr = new XMLHttpRequest()
-          xhr.open('POST', p + '/securelogin')
-          xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-          xhr.onreadystatechange = (function (provider) {
-            return function () {
-              if (xhr.readyState === 4) {
-                var status = ({
+          (function(provider){
+            var xhr = new XMLHttpRequest()
+            xhr.open('POST', provider + '/securelogin')
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+
+            var formatted = e(format(provider))
+            xhr.onload = function () {
+              console.log(provider, xhr.responseText)
+
+              if (xhr.responseText) {                  
+                var msg = ({
                   changed: 'Changed',
                   not_found: 'User is not found',
                   invalid_request: 'Invalid request',
                   invalid_token: 'Invalid token',
                   pubkey_exist: 'This user already exists'
-                })[xhr.response]
+                })[xhr.responseText]
 
-                window.changestatus.innerHTML += '<tr><td>' + e(format(provider)) + '</td><td>' + e(status) + '</td></tr>'
+                status(formatted + ' - ' + msg)
 
                 if (--awaitRequests == 0){
-                  window.changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
+                  status('Done')
                   Profiles[n].root = newProfile.root
                   Profiles[n].email = newProfile.email
                   Profiles[n].checksum = checksum(newpw)
@@ -509,14 +523,13 @@ window.onload = function () {
                 }
               }
             }
+            xhr.onerror = function () {
+              status(formatted + ' - Error, try again later')
+            }
+            xhr.send('sltoken=' + encodeURIComponent(changeToken))
           })(p)
 
 
-          try {
-            xhr.send('sltoken=' + encodeURIComponent(changeToken))
-          } catch (e) {
-            console.log('error changing profile')
-          }
         }
 
       })
@@ -535,6 +548,15 @@ window.onload = function () {
   }
 
   main()
+
+  derive('password','smoke@test.test', function (smoketest) {
+    if(smoketest !== 'm96n+NWlQB5oRLJQjfy0jzHLmKrhuYXNcWQyesyMnwA='){
+      document.write("This platform is not supported, please contact info@sakurity.com with details about your device")
+    }
+  })
+  
+
+
 }
 
 document.addEventListener('deviceready', function () {
