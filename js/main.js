@@ -1,647 +1,619 @@
+/* global $, nacl, hmac, sign, screen, Profiles, fromQuery, toQuery, show, hide,
+          chrome, csv, Benc, Bdec, Udec, secondsFromNow, nodeRequire, XMLHttpRequest,
+          e, alert, format, confirm, scryptjs logout, prompt, btoa */
+
 // Weak mode #1
-scrypt_opts = [18, 6]
+var scryptOpts = [18, 6]
 
 // Recommended mode for v2
-// scrypt_opts = [20, 20]
+// var scryptOpts = [20, 20]
 
-
-function save(){
-  localStorage.profiles = JSON.stringify(Profiles)
+function save () {
+  window.localStorage.profiles = JSON.stringify(Profiles)
 }
 
-function main(){
-  var await_for = 500
-  if(Profiles.length > 0){
+function main () {
+  var waitFor = 500
+  if (Profiles.length > 0) {
     save()
     listProfiles()
 
-    L = Profiles[Number(localStorage.current_profile)]
-    if(L.visited){
-      $('.changefor').value = L.visited.join("\n")
+    var L = Profiles[Number(window.localStorage.current_profile)]
+    if (L.visited) {
+      $('.changefor').value = L.visited.join('\n')
     }
     $('.newemail').value = L.email
 
-    if(inweb){
-      if(opener){
-        window.addEventListener('message', function(e){
+    if (window.inweb) {
+      if (window.opener) {
+        window.addEventListener('message', function (e) {
           var msg = fromQuery(e.data)
-          msg.client = e.origin //force set provider
+          msg.client = e.origin // Force set provider
           messageDispatcher(msg)
         })
 
-        //notify the opener we are ready
-        opener.postMessage('ping','*')
-        await_for = 50
-      }else{
-        await_for = 0
+        // Notify the opener we are ready
+        window.opener.postMessage('ping', '*')
+        waitFor = 50
+      } else {
+        waitFor = 0
       }
     }
 
     show($('.main-form'))
-
-  }else{
+  } else {
     hide($('.main-form'))
   }
 
-  window.delayed_launch = setTimeout(function(){
+  window.delayed_launch = setTimeout(function () {
     screen('list')
-  },await_for)
+  }, waitFor)
 }
 
-
-
-function listProfiles(use_i){
-  if(typeof use_i == 'undefined'){
-    use_i = localStorage.current_profile
+function listProfiles (useProfile) {
+  if (typeof useProfile === 'undefined') {
+    useProfile = window.localStorage.current_profile
   }
 
   var list = ''
-  var used_titles = []
-  for(var i in Profiles){
+  var usedTitles = []
+  for (var i in Profiles) {
     var o = Profiles[i]
-    var title = e(o.email) //
-    if(used_titles.indexOf(title) != -1){
-      title += " ("+o.date.substr(0,10)+')'
-    }else{
-      used_titles.push(title);
+    var title = e(o.email)
+    if (usedTitles.indexOf(title) !== -1) {
+      title += ' (' + o.date.substr(0, 10) + ')'
+    } else {
+      usedTitles.push(title)
     }
 
-    list += '<option '+(Number(use_i) == i ? 'selected' : '')+' value="'+i+'">'+title+'</option>'
+    list += '<option ' + (Number(useProfile) === i ? 'selected' : '') + ' value="' + i + '">' + title + '</option>'
   }
-  // all dropdowns have up-to-date list
-  document.querySelectorAll('.profilelist').forEach(function(elem){
+
+  // All dropdowns have up-to-date list
+  document.querySelectorAll('.profilelist').forEach(function (elem) {
     elem.innerHTML = list
   })
 }
 
-
-
-function getProfile(n){
-  //clone profile, not modifying it
+function getProfile (n) {
+  // Clone profile, not modifying it
   var profile = Object.assign({}, Profiles[Number(n)])
 
-  profile.shared_base = hmac(profile.root, 'shared');
-  profile.shared_key = nacl.sign.keyPair.fromSeed( Bdec(profile.shared_base) )
+  profile.shared_base = hmac(profile.root, 'shared')
+  profile.shared_key = nacl.sign.keyPair.fromSeed(Bdec(profile.shared_base))
 
   return profile
 }
 
-
-
-// where everything happens
-function messageDispatcher(message){
+// Where everything happens
+function messageDispatcher (message) {
   clearTimeout(window.delayed_launch)
 
-  // few hacks to return UI back to "baseline", if the app was left in another state
+  // A few hacks to return UI back to "baseline", if the app was left in another state
   hide('.ios')
   show('.container')
-  delete($('.approve').style['background-color'])
+  delete ($('.approve').style['background-color'])
 
-  m = message // store in global variable
-  var web_url = /^https?:\/\/[a-z0-9-\.]+(:[0-9]{1,5})?$/
-  if( m.provider && m.provider != m.client && m.provider.match(web_url)){
-    $('.app').innerHTML = '<h2 class="app-name">'+e(format(m.client))+'</h2><p style="text-align:center">would like access to your account on</p><h2 class="app-name">'+e(format(m.provider))+"</p>"
-  }else{
-    // by default the client asks sltoken for itself
-    m.provider = m.client
-    $('.app-name').innerText = format(m.client)
+  window.m = message // Store in global variable
+  var webURL = /^https?:\/\/[a-z0-9-.]+(:[0-9]{1,5})?$/
+  if (window.m.provider && window.m.provider !== window.m.client && window.m.provider.match(webURL)) {
+    $('.app').innerHTML = '<h2 class="app-name">' + e(format(window.m.client)) + '</h2><p style="text-align:center">would like access to your account on</p><h2 class="app-name">' + e(format(window.m.provider)) + '</p>'
+  } else {
+    // By default, the client asks sltoken for itself
+    window.m.provider = window.m.client
+    $('.app-name').innerText = format(window.m.client)
   }
 
-  if(!m.scope) m.scope = ''
-  
-  var use_i = false
-  if(m.pubkey){
-    if(Profiles.length == 0){
-      alert("You have no profiles yet")
+  if (!window.m.scope) window.m.scope = ''
+
+  var useProfile = false
+  if (window.m.pubkey) {
+    if (Profiles.length === 0) {
+      alert('You have no profiles yet')
       main()
       return false
-    }else{ 
-      for(var i in Profiles){
-        if(Benc(getProfile(i).shared_key.publicKey) == m.pubkey){
-          use_i = i;
+    } else {
+      for (var i in Profiles) {
+        if (Benc(getProfile(i).shared_key.publicKey) === window.m.pubkey) {
+          useProfile = i
           $('.currentlist').disabled = true
-          break;
+          break
         }
       }
 
-      if(!use_i){
-        alert("Profile required for this request cannot be found")
+      if (!useProfile) {
+        alert('Profile required for this request cannot be found')
         main()
-        return false;
+        return false
       }
     }
-
-  }else{
-    use_i = localStorage.current_profile
+  } else {
+    useProfile = window.localStorage.current_profile
   }
 
-  if(Profiles.length == 0){
-    main();
-    return false;
+  if (Profiles.length === 0) {
+    main()
+    return false
   }
 
   /*
   TODO: SecureLogin server as central authority for email confirmation
-  if(m.confirmed && !getProfile(use_i).confirmed){
-    alert("Unconfirmed")
+  if(window.m.confirmed && !getProfile(useProfile).confirmed){
+    alert('Unconfirmed')
   }
   */
 
-  listProfiles(use_i);
-
-
+  listProfiles(useProfile)
 
   screen('auth')
-  data = $('.auth-data')
+  var data = $('.auth-data')
   hide(data)
 
+  var label = ''
 
-  switch(m.scope) {
-    case '': 
+  switch (window.m.scope) {
+    case '':
       label = 'Sign In'
       break
-    case 'mode=delete': 
+    case 'mode=delete':
       label = 'Delete This Account'
-      $('.approve').style['background-color'] = 'red'    
+      $('.approve').style['background-color'] = 'red'
       break
     default:
-      var req = fromQuery(m.scope)
-      if(req.mode == 'change'){
-        // we don't want apps signing mode=change manually, users must use profile change page
+      var req = fromQuery(window.m.scope)
+      if (req.mode === 'change') {
+        // We don't want apps signing mode=change manually, users must use profile change page
         alert('mode=change is not allowed')
-        return false;
+        return false
       }
 
       var str = ''
-      for(var k in req){
-        str+='<div class="settings-control-group"><label class="settings-control-label">'+e(k)+'</label>'+e(req[k])+'</div>'
+      for (var k in req) {
+        str += '<div class="settings-control-group"><label class="settings-control-label">' + e(k) + '</label>' + e(req[k]) + '</div>'
       }
-      data.innerHTML = str;
+      data.innerHTML = str
       show(data)
 
-      label = (m.provider == m.client) ? 'Approve' : 'Grant Access'
-    
+      label = (window.m.provider === window.m.client) ? 'Approve' : 'Grant Access'
   }
-  
-  $(".approve").innerText = label
 
-  //We try to stop backclickjack for sensitive actions
-  btn = $('.approve')
-  if(m.scope != ''){
+  $('.approve').innerText = label
+
+  // We try to stop backclickjack for sensitive actions
+  var btn = $('.approve')
+  if (window.m.scope !== '') {
     hide(btn)
-    setTimeout(function(){
+    setTimeout(function () {
       show(btn)
     }, 500)
   }
 
-  btn.onclick = function(){
-    hide(btn) // to not click twice
+  btn.onclick = function () {
+    hide(btn) // To not click twice
 
     var val = Number($('.currentlist').value)
-    L = getProfile(val);
+    var L = getProfile(val)
 
-    if(!Profiles[val].visited){
+    if (!Profiles[val].visited) {
       Profiles[val].visited = []
     }
-    
-    // add once, and doublecheck pw
-    if(Profiles[val].visited.indexOf(m.provider) == -1){
-      Profiles[val].visited.push(m.provider)
-      save()
-      console.log('saving new visited provider')
 
-      var doublecheck_milestones = [2, 4, 8, 16]
+    // Add once, and doublecheck pw
+    if (Profiles[val].visited.indexOf(window.m.provider) === -1) {
+      Profiles[val].visited.push(window.m.provider)
+      save()
+
+      var milestones = [2, 4, 8, 16]
       var used = Profiles[val].visited.length
 
-      if(doublecheck_milestones.indexOf(used) != -1){
-        var pw = prompt("Congrats, you already enjoyed SecureLogin "+used+" times. Friendly reminder: you must remember your master password at all times. Can you type it again please?")
-        if(pw && checksum(pw) == L.checksum){
-          alert("Correct, thanks!")
-        }else{
-          alert("Incorrect, if you forgot it please change it")
+      if (milestones.indexOf(used) !== -1) {
+        var pw = prompt('Congrats, you already enjoyed SecureLogin ' + used + ' times. Friendly reminder: you must remember your master password at all times. Can you type it again please?')
+        if (pw && checksum(pw) === L.checksum) {
+          alert('Correct, thanks!')
+        } else {
+          alert('Incorrect, if you forgot it please change it')
           main()
-          return false;
+          return false
         }
       }
     }
 
-    var sltoken = approve(L, m.provider, m.client, m.scope)
+    var sltoken = approve(L, window.m.provider, window.m.client, window.m.scope)
 
-    if(inweb){
-      opener.postMessage(sltoken, m.provider)
-    }else if(E){
-      //ipc to main processor
-      E.ipcRenderer.send('response', sltoken)
-    } else if(window.cordova && m.conn){
-      //Bug in WSS - sometimes nothing is sent. 
-      console.log('sending ',sltoken,m.conn)
-      var attempt = function(){
-        wsserver.send(m.conn, sltoken);
+    if (window.inweb) {
+      window.opener.postMessage(sltoken, window.m.provider)
+    } else if (window.E) {
+      // IPC to main processor
+      window.E.ipcRenderer.send('response', sltoken)
+    } else if (window.cordova && window.m.conn) {
+      // Bug in WSS - sometimes nothing is sent.
+      var attempt = function () {
+        window.wsserver.send(window.m.conn, sltoken)
       }
 
-      //wsserver.send(m.conn, sltoken);
+      // wsserver.send(window.m.conn, sltoken)
       attempt()
       setInterval(attempt, 100)
 
-      setTimeout(function(){
+      setTimeout(function () {
         quit()
       }, 1000)
-
     }
   }
 }
 
-function quit(){
-  wsserver.stop(function(addr, port) {
-    console.log('Stopped listening on %s:%d', addr, port);
-    setTimeout(function(){
+function quit () {
+  window.wsserver.stop(function (addr, port) {
+    setTimeout(function () {
       navigator.app.exitApp()
-    },200)
-  });  
+    }, 200)
+  })
 }
 
-function allclick(mask, listener){
+function allclick (mask, listener) {
   var elements = document.querySelectorAll(mask)
   for (var i = 0; i < elements.length; i++) {
-    elements[i].addEventListener('click', listener);
+    elements[i].addEventListener('click', listener)
   }
 }
 
-function approve(profile, provider, client, scope){
-  var shared_secret = hmac( profile.shared_base , "secret:"+provider)
-  var to_sign = csv([provider, client, scope, secondsFromNow(60)])
+function approve (profile, provider, client, scope) {
+  var sharedSecret = hmac(profile.shared_base, 'secret:' + provider)
+  var toSign = csv([provider, client, scope, secondsFromNow(60)])
   return csv([
-      to_sign,
-      csv([sign(to_sign, Benc(profile.shared_key.secretKey)), hmac(shared_secret, to_sign)]),
-      csv([Benc(profile.shared_key.publicKey), (provider == client) ? shared_secret : '']), // we don't leak shared_secret to Connect requests
-      profile.email
-    ])
+    toSign,
+    csv([sign(toSign, Benc(profile.shared_key.secretKey)), hmac(sharedSecret, toSign)]),
+    csv([Benc(profile.shared_key.publicKey), (provider === client) ? sharedSecret : '']), // We don't leak sharedSecret to Connect requests
+    profile.email
+  ])
 }
 
-
-function derive(password, email, cb){
+function derive (password, email, cb) {
   var opts = {
-    N: Math.pow(2,scrypt_opts[0]),
+    N: Math.pow(2, scryptOpts[0]),
     interruptStep: 1000,
-    p: scrypt_opts[1],
+    p: scryptOpts[1],
     r: 8,
     dkLen: 32,
     encoding: 'base64'
-  }  //1 1 cinii
+  } // 1 1 cinii
 
-
-  if(E){
-    try{
-      // no success compiling scrypt for windows
-      window.npm_scrypt = nodeRequire("scrypt")
-    }catch(e){}
+  if (window.E) {
+    try {
+      // No success compiling scrypt for windows
+      window.npm_scrypt = nodeRequire('scrypt')
+    } catch (e) {}
   }
 
-  if(window.npm_scrypt){
-    npm_scrypt.hash(password,opts,32,email).then(function(root){cb(root.toString("base64"))})
-  }else if(email!='force@scrypt.com' && window.plugins && window.plugins.scrypt){
-    // sometimes we want to make sure native plugin is faster
-    window.plugins.scrypt(function(root){cb(hexToBase64(root))}, alert, password, email, opts)
-  }else{
+  if (window.npm_scrypt) {
+    window.npm_scrypt.hash(password, opts, 32, email).then(function (root) {
+      cb(root.toString('base64'))
+    })
+  } else if (email !== 'force@scrypt.com' && window.plugins && window.plugins.scrypt) {
+    // Sometimes we want to make sure native plugin is faster
+    window.plugins.scrypt(function (root) {
+      cb(hexToBase64(root))
+    }, alert, password, email, opts)
+  } else {
     scryptjs(password, email, opts, cb)
   }
-
 }
 
-
-function hexToBase64(hexstring) {
-    return btoa(hexstring.match(/\w{2}/g).map(function(a) {
-        return String.fromCharCode(parseInt(a, 16));
-    }).join(""));
+function hexToBase64 (hexstring) {
+  return btoa(hexstring.match(/\w{2}/g).map(function (a) {
+    return String.fromCharCode(parseInt(a, 16))
+  }).join(''))
 }
 
-function checksum(str){
-  return Benc( nacl.hash( Udec(str) )).substr(0,2)
+function checksum (str) {
+  return Benc(nacl.hash(Udec(str))).substr(0, 2)
 }
 
-
-
-
-window.onload = (function(){
-  // event listeners
-  $('.defaultlist').onchange = function(){
-    localStorage.current_profile=this.value;
+window.onload = function () {
+  // Event listeners
+  $('.defaultlist').onchange = function () {
+    window.localStorage.current_profile = this.value
     main()
   }
 
-  legacypw = function(){
-    var base = getProfile(localStorage.current_profile).shared_base
-    var pw = hmac(base, $('.managerprovider').value.toLowerCase() )
-    pw = pw.replace(/[=\/+]/g,'').slice(0,12) + "!"
+  function legacypw () {
+    var base = getProfile(window.localStorage.current_profile).shared_base
+    var pw = hmac(base, $('.managerprovider').value.toLowerCase())
+    pw = pw.replace(/[=/+]/g, '').slice(0, 12) + '!'
     $('.managerpassword').value = pw
   }
+
   $('.managerprovider').oninput = legacypw
-  
- 
-  $('.managerpassword').onclick=function(){
-    $('.managerpassword').select();
-    document.execCommand('copy');
-    show('.copymessage');
-    setTimeout(function(){
+
+  $('.managerpassword').onclick = function () {
+    $('.managerpassword').select()
+    document.execCommand('copy')
+    show('.copymessage')
+    setTimeout(function () {
       hide('.copymessage')
-    },1000)
+    }, 1000)
   }
 
-  if(window.chrome && window.chrome.tabs){
-    // autofill if in ext
-    chrome.tabs.query({active:true},function(t){
-      // get origin and copy
-      if(t[0].url.indexOf('http')==0){
-        $('.managerprovider').value=t[0].url.split('/')[2];
-        legacypw();
-        setTimeout(function(){
-          $('.managerpassword').click();
+  if (window.chrome && window.chrome.tabs) {
+    // Autofill if in ext
+    chrome.tabs.query({
+      active: true
+    }, function (t) {
+      // Get origin and copy
+      if (t[0].url.indexOf('http') === 0) {
+        $('.managerprovider').value = t[0].url.split('/')[2]
+        legacypw()
+        setTimeout(function () {
+          $('.managerpassword').click()
           window.close()
-        },100)
+        }, 100)
       }
-
     })
-    chrome.runtime.onInstalled.addListener(function(details){
-      if(details.reason == "install"){
-        console.log("This is a first install!");
-      }else if(details.reason == "update"){
-        var thisVersion = chrome.runtime.getManifest().version;
-        console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
+    chrome.runtime.onInstalled.addListener(function (details) {
+      if (details.reason === 'install') {
+        console.log('This is a first install!')
+      } else if (details.reason === 'update') {
+        var thisVersion = chrome.runtime.getManifest().version
+        console.log('Updated from ' + details.previousVersion + ' to ' + thisVersion + '!')
       }
-    });
+    })
   }
 
-  $('.real-sign-in').onclick = function generation(){
-    var errors = '';
-    var password = $('#password').value;
+  $('.real-sign-in').onclick = function generation () {
+    var errors = ''
+    var password = $('#password').value
     var email = $('#login').value.toLowerCase()
-    var email_regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
-    if(!email_regex.test(email)){
+    if (!emailRegex.test(email)) {
       errors += 'Invalid email. '
     }
 
-    if(password.length < 8){
+    if (password.length < 8) {
       errors += 'Password must be at least 8 characters. '
     }
 
-    Profiles.map(function(e){ if(e.email == email){ errors += "You already used this email for another profile. "}  })
+    Profiles.map(function (e) {
+      if (e.email === email) {
+        errors += 'You already used this email for another profile. '
+      }
+    })
 
-    if(errors.length > 0){
-      alert(errors);
-      return false;
+    if (errors.length > 0) {
+      alert(errors)
+      return false
     }
-      
+
     $('#password').value = ''
 
-    screen('generation');
+    screen('generation')
 
     show('.step1')
     hide('.step2')
 
-    setTimeout(function(){ 
-      var start_derive = new Date
-      derive(password, email, function(root){
-        // send stats about current device and derivation benchmark
+    setTimeout(function () {
+      var startDerive = new Date()
+      derive(password, email, function (root) {
+        // Send stats about current device and derivation benchmark
 
-        new_profile = {
+        var newProfile = {
           email: email,
           root: root,
           date: new Date().toJSON(),
-          benchmark: new Date-start_derive,
-          scrypt_opts: scrypt_opts.join(','),
+          benchmark: new Date() - startDerive,
+          scrypt_opts: scryptOpts.join(','),
           visited: []
         }
 
         /*
-        don't store too much, it's only for Doublecheck
+        Don't store too much, it's only for Doublecheck
         currently it gives out 12 bits of the hash
         i.e. it's 4096 times easier to bruteforce...
-        but checksum isn't supposed to leave the device 
+        but checksum isn't supposed to leave the device
         and is as confidential as the root itself
         */
-        new_profile.checksum = checksum(password)
+        newProfile.checksum = checksum(password)
 
         hide($('.step1'))
         show($('.step2'))
 
-        $('.accept-rules').onclick = function(){
-          localStorage.current_profile = Profiles.push(new_profile) - 1;
+        $('.accept-rules').onclick = function () {
+          window.localStorage.current_profile = Profiles.push(newProfile) - 1
           main()
         }
-        if(Profiles.length > 0){
-          // already accepted
+        if (Profiles.length > 0) {
+          // Already accepted
           $('.accept-rules').click()
         }
-
       })
-    },50)
+    }, 50)
   }
 
-  password.onkeypress=function(e) {
-    if (e.which == 13) {
-      e.preventDefault();
-      $('.real-sign-in').click();
+  $('#password').onkeypress = function (e) {
+    if (e.which === 13) {
+      e.preventDefault()
+      $('.real-sign-in').click()
     }
   }
 
-  allclick('.native', function(event) {
-    if(this.href.indexOf('chrome.google.com') != -1){
-      localStorage.client = 'ext'
-    }else{
-      localStorage.client = 'app'
+  allclick('.native', function (event) {
+    if (this.href.indexOf('chrome.google.com') !== -1) {
+      window.localStorage.client = 'ext'
+    } else {
+      window.localStorage.client = 'app'
     }
-    console.log('enabled native')
-
   })
 
   allclick('.back', main)
 
-
-
-
-  $('.changeprofile').onclick = function(){
+  $('.changeprofile').onclick = function () {
     screen('change')
   }
 
-  $('.changeconfirm').onclick = function(){
+  $('.changeconfirm').onclick = function () {
     var newpw = $('.newpw').value
     var newemail = $('.newemail').value
-    var providers = $('.changefor').value.split("\n")
-    //TODO: validate
-    if(confirm("You won't be able to use profile created with old password anymore. Are you sure?")){
-      var n=Number(localStorage.current_profile)
-      var old_profile = getProfile(n)
-      var new_profile = Object.assign({}, Profiles[n])
+    var providers = $('.changefor').value.split('\n')
+    // TODO: validate
+    if (confirm("You won't be able to use profile created with old password anymore. Are you sure?")) {
+      var n = Number(window.localStorage.current_profile)
+      var oldProfile = getProfile(n)
+      var newProfile = Object.assign({}, Profiles[n])
 
+      window.changestatus.innerHTML += '<tr><td>Please wait, generating new key...</td><td></td></tr>'
 
-      changestatus.innerHTML += '<tr><td>Please wait, generating new key...</td><td></td></tr>'
+      derive(newpw, newemail, function (root) {
+        newProfile.root = root // updated root
+        newProfile.email = newemail // updated root
+        newProfile.shared_base = hmac(newProfile.root, 'shared')
+        newProfile.shared_key = nacl.sign.keyPair.fromSeed(Bdec(newProfile.shared_base))
 
-      derive(newpw, newemail, function(root){
-        new_profile.root = root // updated root
-        new_profile.email = newemail // updated root
-        new_profile.shared_base = hmac(new_profile.root, 'shared');
-        new_profile.shared_key = nacl.sign.keyPair.fromSeed( Bdec(new_profile.shared_base) )
-
-        for(var i =0;i<providers.length;i++){
+        for (var i = 0; i < providers.length; i++) {
           var p = providers[i]
-          if(p.indexOf('http')!=0){
-            p = 'https://'+p
+          if (p.indexOf('http') !== 0) {
+            p = 'https://' + p
           }
 
-          var new_sltoken = approve(new_profile, p, p, '')
-          var change_sltoken = approve(old_profile, p, p, toQuery({mode: 'change', to: new_sltoken}))
+          var newToken = approve(newProfile, p, p, '')
+          var changeToken = approve(oldProfile, p, p, toQuery({
+            mode: 'change',
+            to: newToken
+          }))
 
           var xhr = new XMLHttpRequest()
 
-          //sync for now to not make a lot of requests at once
-          xhr.open('GET', p+'/securelogin?sltoken='+encodeURIComponent(change_sltoken), true)
-          xhr.onreadystatechange=function(){
-            if(xhr.readyState == 4){
-              
-              console.log(xhr.response)
-              status = ({
-                changed: "Changed",
-                not_found: "User is not found",
-                invalid_request: "Invalid request",
-                invalid_token: "Invalid token",
-                pubkey_exist: "This user already exists"
+          // Sync for now to not make a lot of requests at once
+          xhr.open('GET', p + '/securelogin?sltoken=' + encodeURIComponent(changeToken), true)
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              var status = ({
+                changed: 'Changed',
+                not_found: 'User is not found',
+                invalid_request: 'Invalid request',
+                invalid_token: 'Invalid token',
+                pubkey_exist: 'This user already exists'
               })[xhr.response]
 
-              changestatus.innerHTML += '<tr><td>'+e(format(p))+'</td><td>'+e(status)+'</td></tr>'
-
+              window.changestatus.innerHTML += '<tr><td>' + e(format(p)) + '</td><td>' + e(status) + '</td></tr>'
             }
           }
-          try{
+          try {
             xhr.send()
-          }catch(e){console.log("error changing profile")}
+          } catch (e) {
+            console.log('error changing profile')
+          }
         }
 
-        // TODO: need to make sure if some provider is down, profile is not changed
+        // TODO: We need to make sure that if some provider is down, profile is not changed
         // backup old key?
-        changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
-        Profiles[n].root = new_profile.root;
-        Profiles[n].email = new_profile.email;
-        Profiles[n].checksum = checksum(newpw);
+        window.changestatus.innerHTML += '<tr><td>Done!</td><td></td></tr>'
+        Profiles[n].root = newProfile.root
+        Profiles[n].email = newProfile.email
+        Profiles[n].checksum = checksum(newpw)
         save()
-      })      
+      })
     }
   }
 
   $('.logoutprofile').onclick = logout
 
-  window.inweb = ['http:','https:','chrome-extension:'].indexOf(location.protocol) != -1
-  window.Profiles = localStorage.current_profile ? JSON.parse(localStorage.profiles) : []
+  window.inweb = ['http:', 'https:', 'chrome-extension:'].indexOf(window.location.protocol) !== -1
+  window.Profiles = window.localStorage.current_profile ? JSON.parse(window.localStorage.profiles) : []
 
-  if(inweb && location.protocol != 'chrome-extension:'){
-  }else{
-    hide($('.in-web'));
+  if (window.inweb && window.location.protocol !== 'chrome-extension:') {
+    // Do something
+  } else {
+    hide($('.in-web'))
   }
 
   main()
+}
 
-  // smoke test. Previously Samsung returned wrong Scrypt hashes.
-  //if(window.plugins){
-  //  window.plugins.scrypt(function (res) { window.testscrypt = res; },function (err) { alert(err) },'password', 'salt', {N: 2})
-  //}
-
-    
-
-})
-
-document.addEventListener('deviceready',function(){ 
+document.addEventListener('deviceready', function () {
   /*
   httpd = ( cordova && cordova.plugins && cordova.plugins.CorHttpd ) ? cordova.plugins.CorHttpd : null;
   httpd.getURL(function(url){
     if(url.length > 0) {
       console.log("running",url)
     } else {
-        httpd.startServer({
-          'www_root' : 'proxy',
-          'port' : 3102,
-          'localhost_only' : true
-        }, function( url ){
-          console.log(url)
-        }, function( error ){
-          console.log(error)
-        });
+      httpd.startServer({
+        'www_root': 'proxy',
+        'port': 3102,
+        'localhost_only': true
+      }, function(url) {
+        console.log(url)
+      }, function(error) {
+        console.log(error)
+      })
     }
-    
   });
   */
-  
-  window.wsserver = window.cordova.plugins.wsserver
-  trusted_proxy = 'http://127.0.0.1:3102'
-  l('try start')
-  wsserver.start(3101, {
-    'onFailure' :  function(addr, port, reason) {
-      l("failure "+addr+ port+ reason);
-    },
-    'onOpen' : function(conn) {
-      // only local requests accepted
 
+  window.wsserver = window.cordova.plugins.wsserver
+  var trustedProxy = 'http://127.0.0.1:3102'
+  console.log('try start')
+  window.wsserver.start(3101, {
+    'onFailure': function (addr, port, reason) {
+      console.log('failure ' + addr + port + reason)
     },
-    'onMessage' : function(conn, trusted) {
-      console.log("message ",trusted)
-      if(isLocalhost(conn.remoteAddr) && conn.httpFields.Origin){
-        var trusted_json = JSON.parse(trusted)
-        if(trusted_json.data == 'close'){
+    'onOpen': function (conn) {
+      // Only local requests accepted
+    },
+    'onMessage': function (conn, trusted) {
+      if (isLocalhost(conn.remoteAddr) && conn.httpFields.Origin) {
+        var trustedJSON = JSON.parse(trusted)
+        if (trustedJSON.data === 'close') {
           quit()
-        }else{
-          var trusted_msg = fromQuery(trusted_json.data)
-          
-          //Trusted
-          if(conn.httpFields.Origin == trusted_proxy){
-            trusted_msg.client = trusted_json.origin
-          }else{
-            trusted_msg.client = conn.httpFields.Origin
+        } else {
+          var trustedMSG = fromQuery(trustedJSON.data)
+
+          // Trusted
+          if (conn.httpFields.Origin === trustedProxy) {
+            trustedMSG.client = trustedJSON.origin
+          } else {
+            trustedMSG.client = conn.httpFields.Origin
           }
-          //pass over current conn
-          trusted_msg.conn = conn
-          messageDispatcher(trusted_msg)
+          // Pass over current conn
+          trustedMSG.conn = conn
+          messageDispatcher(trustedMSG)
         }
         return false
       }
     },
-    'onClose' : function(conn, code, reason) {
+    'onClose': function (conn, code, reason) {
       quit()
-      l('disconnected '+conn.remoteAddr);
+      console.log('disconnected ' + conn.remoteAddr)
     },
-    'tcpNoDelay' : true    
-  }, function onStart(addr, port) {
-      l("server "+addr+port);
-  }, function onDidNotStart(reason) {
-      alert("server failed "+reason);
-  });
-
+    'tcpNoDelay': true
+  }, function onStart (addr, port) {
+    console.log('server ' + addr + port)
+  }, function onDidNotStart (reason) {
+    alert('server failed ' + reason)
+  })
 })
 
-
-
-function isLocalhost(ip){
-  return ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(ip) != -1 || ip.indexOf('::ffff:127.0.0.1:') == 0
+function isLocalhost (ip) {
+  return ['127.0.0.1', '::ffff:127.0.0.1', '::1'].indexOf(ip) !== -1 || ip.indexOf('::ffff:127.0.0.1:') === 0
 }
 
-window.handleOpenURL = function(arg) {
+window.handleOpenURL = function (arg) {
   clearTimeout(window.delayed_launch)
 }
 
+try {
+  window.nodeRequire = require
+  delete window.require
+  delete window.exports
+  delete window.module
 
-try{
-  window.nodeRequire = require;
-  delete window.require;
-  delete window.exports;
-  delete window.module;
+  window.E = nodeRequire('electron')
 
-  E = nodeRequire('electron')
-
-  E.ipcRenderer.on('verifiedRequest', function(event, arg){
+  window.E.ipcRenderer.on('verifiedRequest', function (event, arg) {
     clearTimeout(window.delayed_launch)
     var hash = fromQuery(arg.request)
     hash.client = arg.client
     messageDispatcher(hash)
   })
-}catch(e){
-  E = false
+} catch (e) {
+  window.E = false
 }
-
