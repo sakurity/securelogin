@@ -100,26 +100,27 @@
           <div class="in-web">
             <p>Forget about passwords with SecureLogin</p>
             
-            <p><a class="native" href="https://chrome.google.com/webstore/detail/securelogin/abpigncghjblhknbbannlhmgjpjpbajj" ><img src="img/chrometransparent.png" class="store"></a></p>
 
-            <p><a class="native" href="https://play.google.com/store/apps/details?id=pw.securelogin" ><img src="img/googleplay.png" class="store"></a></p>
+            <div class="settings-control-group">
+              <label class="settings-control-label">Preferred SecureLogin client:</label>
+              <select class="settings-control-input slclient">
+                <option value='web'>This Web client (Easiest to use, but depends on our server)</option>
 
-            <!--Thanks to Safari, iOS app is too hard to use
-            <p><a class="native" href="https://itunes.apple.com/us/app/securelogin/id1236532215?ls=1&mt=8"><img src="img/appstore.svg" class="store"></a></p>
-            -->
+                <option value='ext'>Chrome Extension (Best option for Chrome users)</option>
 
-            <p><a href="/apps/SecureLogin-1.0.0.dmg" class="native"><img style="background:black;width:200px;border-radius:6px;" class="store" src="img/macos_badge.png">
-            </a></p>
+                <option value='app'>Native app (Installed locally on your desktop / mobile)</option>
+              </select>
+            </div>
 
-            <p><a class="native"  href="/apps/SecureLogin Setup 1.0.0.exe"><img src="img/windowsstore.png" class="store"></a></p>
-         
-            <p>All platforms are supported. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a></p>
+            <div class="offer-client">
+            <p><a class="native" href="" ><img class="store"></a></p>
 
-            <p>You can also use Web client below</p>
+              <p>We support macOS, Windows, Linux, Android, iOS and Chrome browser. The source code and other installers are <a href="https://github.com/sakurity/securelogin">available here</a></p>  
+            </div>          
 
           </div>
 
-          <div class="settings-control-group main-form h">
+          <div class="settings-control-group main-form">
             <p>Legacy Password Generator</p>
             <p style="font-size:14px">Here you can generate a password for websites that <b>don't support SecureLogin yet</b> and still rely on insecure legacy passwords</p>
             <p><input type="text" class="settings-control-input managerprovider" placeholder="Domain e.g. 'twitter.com' "></p>
@@ -139,6 +140,9 @@
             <p><input required=true type="email" id="login" class="settings-control-input" placeholder="Email"></p>
             <input required=true type="password" id="password" class="settings-control-input" placeholder="Master Password">
             <a class="b real-sign-in slbutton">Add SecureLogin profile</a>
+
+
+
           </div>
         </div>
       </div>
@@ -154,5 +158,6 @@
     <script type="text/javascript" src="js/scryptasync.js"></script>
     <script type="text/javascript" src="js/nacl.js"></script>
     <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/bowser.js"></script>
   </body>
 </html>

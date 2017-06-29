@@ -24,11 +24,11 @@ function main () {
     }
     $('.newemail').value = L.email
 
-    if (window.inweb) {
+    if (inweb || inchrome) {
       if (window.opener) {
         window.addEventListener('message', function (e) {
           var msg = fromQuery(e.data)
-          msg.client = e.origin // Force set provider
+          msg.client = e.origin
           messageDispatcher(msg)
         })
 
@@ -39,8 +39,8 @@ function main () {
         waitFor = 0
       }
     }
-
-    show($('.main-form'))
+    if (inweb && localStorage.client != 'web')
+    hide($('.main-form'))
   } else {
     hide($('.main-form'))
   }
@@ -220,7 +220,7 @@ function messageDispatcher (message) {
 
     var sltoken = approve(L, window.m.provider, window.m.client, window.m.scope)
 
-    if (window.inweb) {
+    if (inweb || inchrome) {
       window.opener.postMessage(sltoken, window.m.provider)
     } else if (window.E) {
       // IPC to main processor
@@ -321,6 +321,46 @@ function status (msg) {
   $('.status').appendChild(p)
 }
 
+function setClient (flow) {
+  var client = flow ? flow : 'web'
+  localStorage.client = flow
+  $('.slclient>option[value="'+client+'"]').selected = true
+
+  var c = []
+  if (client == 'web') {
+    show('.login-form')
+    hide($('.offer-client'))
+    return false;
+  }
+  
+  $('.native>img').style=''
+
+  if (client == 'ext') {
+    c = ['img/chrometransparent.png', 'https://chrome.google.com/webstore/detail/securelogin/abpigncghjblhknbbannlhmgjpjpbajj']
+  } else if (client == 'app') {
+    if (bowser.android) {
+      c = ['img/googleplay.png', 'https://play.google.com/store/apps/details?id=pw.securelogin']
+    }
+    if (bowser.ios) {
+      c = ['img/appstore.svg', 'https://itunes.apple.com/us/app/securelogin/id1236532215?ls=1&mt=8']
+    }
+    if (bowser.mac) {
+      $('.native>img').style='background:black;width:200px;border-radius:6px;'
+      c = ['img/macos_badge.png', '/apps/SecureLogin-1.0.0.dmg']
+    }
+    if (bowser.windows) {
+      c = ['img/windowsstore.png', '/apps/SecureLogin Setup 1.0.0.exe']
+    }
+  }
+  hide('.main-form')
+  hide('.login-form')
+  show($('.offer-client'))
+
+  $('.native>img').src = c[0]
+  $('.native').href = c[1]
+
+}
+
 window.onload = function () {
   // Event listeners
   $('.defaultlist').onchange = function () {
@@ -330,7 +370,7 @@ window.onload = function () {
 
   function legacypw () {
     var base = getProfile(window.localStorage.current_profile).shared_base
-    var pw = hmac(base, $('.managerprovider').value.toLowerCase())
+    var pw = hmac(base, 'pw:'+$('.managerprovider').value.toLowerCase())
     pw = pw.replace(/[=/+]/g, '').slice(0, 12) + '!'
     $('.managerpassword').value = pw
   }
@@ -346,7 +386,9 @@ window.onload = function () {
     }, 1000)
   }
 
+
   if (window.chrome && window.chrome.tabs) {
+
     // Autofill if in ext
     chrome.tabs.query({
       active: true
@@ -448,14 +490,6 @@ window.onload = function () {
     }
   }
 
-  allclick('.native', function (event) {
-    if (this.href.indexOf('chrome.google.com') !== -1) {
-      window.localStorage.client = 'ext'
-    } else {
-      window.localStorage.client = 'app'
-    }
-  })
-
   allclick('.back', main)
 
   $('.changeprofile').onclick = function () {
@@ -538,11 +572,30 @@ window.onload = function () {
 
   $('.logoutprofile').onclick = logout
 
-  window.inweb = ['http:', 'https:', 'chrome-extension:'].indexOf(window.location.protocol) !== -1
+  window.inweb = ['http:', 'https:'].indexOf(window.location.protocol) !== -1
+  window.inchrome = 'chrome-extension:' == location.protocol
   window.Profiles = window.localStorage.current_profile ? JSON.parse(window.localStorage.profiles) : []
 
-  if (window.inweb && window.location.protocol !== 'chrome-extension:') {
-    // Do something
+  if (window.inweb) {
+
+    allclick('.native', function (event) {
+      if (this.href.indexOf('chrome.google.com') !== -1) {
+        setClient('ext')
+      } else {
+        setClient('app')
+      }
+    })
+
+    $('.slclient').onchange = function () {
+      setClient(this.value)
+    }
+    if (bowser.chrome && !bowser.android) {
+      setClient('ext')
+    } else {
+      setClient('app')
+    }
+
+
   } else {
     hide($('.in-web'))
   }
@@ -555,8 +608,6 @@ window.onload = function () {
     }
   })
   
-
-
 }
 
 document.addEventListener('deviceready', function () {

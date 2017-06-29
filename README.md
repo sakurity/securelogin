@@ -69,17 +69,7 @@ Check out <a href="https://github.com/homakov/cobased/blob/master/app/controller
 - [node-securelogin](https://github.com/andrewda/node-securelogin)
 - [passport-securelogin](https://github.com/andrewda/passport-securelogin)
 
-Help needed for implementations for:
-
-* Wordpress
-
-* Django
-
-* Soft transition from Devise and Omniauth
-
-* Node.js
-
-* any other CMS and platform
+Help needed for implementations for top 20 of [hot frameworks](https://hotframeworks.com/)
 
 ## FAQ
 

@@ -1,0 +1,1 @@
+(opener || parent).postMessage({client: localStorage.client},'*');
