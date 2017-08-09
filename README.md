@@ -1,5 +1,7 @@
 ## SecureLogin Protocol
 
+[![Join the chat at https://gitter.im/secureloginpw/Lobby](https://badges.gitter.im/secureloginpw/Lobby.svg)](https://gitter.im/secureloginpw/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ### Abstract
 
 Before you dig into details, try the demos: <a href="https://cobased.com">Rails demo</a>, <a href="https://passport-securelogin.herokuapp.com">Node.js demo</a>
