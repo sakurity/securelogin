@@ -71,6 +71,10 @@ Check out <a href="https://github.com/homakov/cobased/blob/master/app/controller
 - [node-securelogin](https://github.com/andrewda/node-securelogin)
 - [passport-securelogin](https://github.com/andrewda/passport-securelogin)
 
+##### Go
+
+- [securelogin](https://godoc.org/github.com/vladimiroff/securelogin)
+
 Help needed for implementations for top 20 of [hot frameworks](https://hotframeworks.com/)
 
 ## FAQ
