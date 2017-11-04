@@ -1,3 +1,16 @@
+# Do not use! SecureLogin for existing web is not maintained and soon will be part of a whole new approach based on a blockchain. 
+
+Reasons:
+
+1. Lack of incentive from website admins to implement this protocol and put initial friction on shoulders of the users
+
+2. The web and Chrome app versions compromise on security too much, and the desktop version is way too heavy. New version is getting rid from electron and uses pure node.js
+
+3. New protocols are not being adapted if you don't give 10x improvement. Apparently, SecureLogin by itself wasn't 10x. Let's figure out how to make it in bundle with instant scalable cryptocurrency be a real 10x. To be announced on 3/1/2018.
+
+
+------
+
 ## SecureLogin Protocol
 
 [![Join the chat at https://gitter.im/secureloginpw/Lobby](https://badges.gitter.im/secureloginpw/Lobby.svg)](https://gitter.im/secureloginpw/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
