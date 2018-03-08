@@ -6,7 +6,19 @@ Reasons:
 
 2. The web and Chrome app versions compromise on security too much, and the desktop version is way too heavy. New version is getting rid from electron and uses pure node.js
 
-3. New protocols are not being adapted if you don't give 10x improvement. Apparently, SecureLogin by itself wasn't 10x. Let's figure out how to make it in bundle with instant scalable cryptocurrency be a real 10x. To be announced on 3/1/2018.
+3. New protocols are not being adapted if you don't give 10x improvement. SecureLogin by itself wasn't 10x. 
+
+Now SecureLogin is merely 'login' <a href="https://github.com/failsafenetwork/failsafe/blob/master/src/internal_rpc.js#L248">a method exposed in Failsafe blockchain</a>. A website can request it, and after the user confirms the JS gets back a token consisting of pubkey and signature of current origin. Difference from original SecureLogin:
+
+* No more provider & client. Client different from provider is only useful for OAuth like interactions, which would be a long way after making this popular for traditional login
+
+* No more secret & hmac given separately - pubkey does the signing job.
+
+* No more timestamp - if you managed to obtain the signature once, you could do it again.
+
+* No more scope - scope could be useful in financial apps only, and failsafe itself has payments inside.
+
+**So it's not dead, it's reincorporated in something that has much more potential and fixes much more important problem than merely authentication. **
 
 
 ------
