@@ -18,7 +18,8 @@ Now SecureLogin is merely 'login' <a href="https://github.com/failsafenetwork/fa
 
 * No more scope - scope could be useful in financial apps only, and failsafe itself has payments inside.
 
-**So it's not dead, it's reincorporated in something that has much more potential and fixes much more important problem than merely authentication. **
+__So it's not dead, but re-incorporated as simple API into something that has much more potential, has monetization model and fixes much more important problem than merely authentication on the web.__
+
 
 
 ------
