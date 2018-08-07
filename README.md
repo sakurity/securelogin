@@ -8,7 +8,7 @@ Reasons:
 
 3. New protocols are not being adapted if you don't give 10x improvement. SecureLogin by itself wasn't 10x. 
 
-Now SecureLogin is merely 'login' <a href="https://github.com/failsafenetwork/failsafe/blob/master/src/internal_rpc.js#L248">a method exposed in Failsafe blockchain</a>. A website can request it, and after the user confirms the JS gets back a token consisting of pubkey and signature of current origin. Difference from original SecureLogin:
+Now SecureLogin is merely 'login' <a href="https://github.com/fairlayer/fair">a method exposed in Fairlayer blockchain</a>. A website can request it, and after the user confirms the JS gets back a token consisting of pubkey and signature of current origin. Difference from original SecureLogin:
 
 * No more provider & client. Client different from provider is only useful for OAuth like interactions, which would be a long way after making this popular for traditional login
 
@@ -16,7 +16,7 @@ Now SecureLogin is merely 'login' <a href="https://github.com/failsafenetwork/fa
 
 * No more timestamp - if you managed to obtain the signature once, you could do it again.
 
-* No more scope - scope could be useful in financial apps only, and failsafe itself has payments inside.
+* No more scope - scope could be useful in financial apps only, and fairlayer itself has payments inside.
 
 __So it's not dead, but re-incorporated as simple API into something that has much more potential, has monetization model and fixes much more important problem than merely authentication on the web.__
 
