@@ -48,7 +48,7 @@ Here are major problems it solves:
 
 5. __Malware__: SecureLogin 2.0 with Doublesign stops malware trying to act on behalf of your account – usually to steal your money. Doublesign is like a "two man rule" - the server must verify two signatures of "scope" which includes every detail of the transaction e.g. SWIFT, amount, currency, account number or Bitcoin address. The entire transaction is signed on both devices (usually desktop + mobile) so compromise of one of them wouldn't be enough to empty your bank account (unlike how it is now).
 
-6. __Phishing__: Many security experts tend to say phishing is the problem of the users not looking at the URL they type their password on. It's totally wrong. We belive phishing is an extremely important problem and we built-in the protocol in a way to make phishing impossible: every message is either sent to a Web/Extension via postMessage, revealing real `event.origin` or to a native app via `ws://127.0.0.1:3101` revealing `Origin` header.
+6. __Phishing__: Many security experts tend to say phishing is the problem of the users not looking at the URL they type their password on. It's totally wrong. We believe phishing is an extremely important problem and we built-in the protocol in a way to make phishing impossible: every message is either sent to a Web/Extension via postMessage, revealing real `event.origin` or to a native app via `ws://127.0.0.1:3101` revealing `Origin` header.
 
 ### SecureLogin vs X
 
